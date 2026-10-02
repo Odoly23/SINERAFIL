@@ -1,0 +1,45 @@
+{% extends "main/layout.html" %}
+{% load sinerafil_tags %}
+{% block content %}
+<div class="container-fluid mt-3">
+  <div class="row">
+    <div class="col-lg-4 mb-3">
+      <div class="card">
+        <div class="card-header"><i class="fa fa-cog"></i> {{ legend|upper }}</div>
+        <div class="card-body">
+          <h5 class="text-maroon">{{ obj.code }}</h5>
+          <p class="mb-1"><strong>{{ obj.name }}</strong></p>
+          <p class="text-muted">{{ obj.kategoria|default:'Kategoria la iha' }}</p>
+          <table class="table table-sm table-borderless mb-2">
+            <tr><td>Stock</td><td class="text-right"><strong class="{% if obj.is_low %}text-danger{% endif %}">{{ obj.stock }} {{ obj.unit }}</strong></td></tr>
+            <tr><td>Stock mínimu</td><td class="text-right">{{ obj.stock_min }}</td></tr>
+            <tr><td>Folin sosa</td><td class="text-right">{{ obj.price_buy|usd }}</td></tr>
+            <tr><td>Folin faan</td><td class="text-right">{{ obj.price_sell|usd }}</td></tr>
+            <tr><td>Lukru / unidade</td><td class="text-right">{{ obj.profit|usd }}</td></tr>
+            <tr><td>Valór stock</td><td class="text-right">{{ obj.stock_value|usd }}</td></tr>
+          </table>
+          {% if obj.is_low %}<div class="alert alert-warning py-2 small"><i class="fa fa-exclamation-triangle"></i> Stock to'o ona nível mínimu.</div>{% endif %}
+          {% if obj.description %}<p class="small">{{ obj.description }}</p>{% endif %}
+          {% if group == "admin" %}<a href="{% url 'pesa-edit' obj.pk %}" class="btn btn-sm btn-warning"><i class="fa fa-edit"></i> Edita</a>{% endif %}
+          <a href="{% url 'pesa-list' %}" class="btn btn-sm btn-secondary">Fila</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-8 mb-3">
+      <div class="card">
+        <div class="card-header"><i class="fa fa-history"></i> ISTÓRIA MOVIMENTU STOCK</div>
+        <div class="table-responsive">
+          <table class="table table-sm mb-0">
+            <thead><tr><th>Data</th><th>Tipu</th><th>Kuant.</th><th>Referénsia</th><th>Nota</th></tr></thead>
+            <tbody>
+            {% for m in movimentu %}
+              <tr><td>{{ m.date|date:'d/m/Y' }}</td><td>{{ m.tipu|status_badge }}</td><td>{{ m.quantity }}</td><td>{{ m.reference|default:'—' }}</td><td class="small">{{ m.note|default:'—' }}</td></tr>
+            {% empty %}<tr><td colspan="5" class="text-center text-muted py-3">Seidauk iha movimentu.</td></tr>{% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

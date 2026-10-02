@@ -1,0 +1,22 @@
+{% extends "main/layout.html" %}
+{% block content %}
+<div class="container-fluid mt-3">
+  <div class="card" style="max-width: 720px;">
+    <div class="card-header"><i class="fa fa-user"></i> {{ legend|upper }}</div>
+    <div class="card-body">
+      <table class="table table-sm table-borderless">
+        <tr><td style="width:35%">Naran</td><td><strong>{{ obj.name }}</strong></td></tr>
+        <tr><td>Sexo</td><td>{{ obj.sexo|default:'—' }}</td></tr>
+        <tr><td>Telefone</td><td>{{ obj.phone|default:'—' }}</td></tr>
+        <tr><td>Email</td><td>{{ obj.email|default:'—' }}</td></tr>
+        <tr><td>Username</td><td>{{ empuser.user.username|default:'—' }}</td></tr>
+        <tr><td>Papél</td><td>{{ empuser.user.groups.first.name|upper|default:'—' }}</td></tr>
+        <tr><td>Persentajen ongkos</td><td>{{ obj.persen_ongkos }}%</td></tr>
+        <tr><td>Konta ativu</td><td>{% if empuser.user.is_active %}Sin{% else %}Lae{% endif %}</td></tr>
+      </table>
+      <a href="{% url 'emp-update' obj.pk %}" class="btn btn-sm btn-warning"><i class="fa fa-edit"></i> Edita</a>
+      <a href="{% url 'u-list' %}" class="btn btn-sm btn-secondary">Fila</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

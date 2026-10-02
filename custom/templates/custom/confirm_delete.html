@@ -1,0 +1,16 @@
+{% extends "main/layout.html" %}
+{% block content %}
+<div class="container-fluid mt-3">
+  <div class="card border-danger" style="max-width: 640px;">
+    <div class="card-header"><i class="fa fa-trash"></i> {{ legend|upper }}</div>
+    <div class="card-body">
+      <p class="lead">Ita hakarak hamoos <strong>"{{ obj }}"</strong>?</p>
+      <p class="text-muted">Aksaun ida-ne'e labele hasai fali.</p>
+      <form method="post">{% csrf_token %}
+        <button type="submit" class="btn btn-danger"><i class="fa fa-trash"></i> Sin, hamoos</button>
+        <a href="{% url cancel_url %}" class="btn btn-secondary">Kansela</a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

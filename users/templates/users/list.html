@@ -1,0 +1,53 @@
+{% extends "main/layout.html" %}
+{% load sinerafil_tags %}
+{% block content %}
+<div class="container-fluid mt-3">
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="card">
+        <div class="card-header">
+          <i class="fa fa-list"> {{legend|upper}}</i>
+        </div>
+        <div class="card-body">
+          
+          <div class="table-responsive">
+            <a class="btn btn-primary btn-sm mb-2" href="{% url 'user-add' %}"><i class="fa fa-plus"></i> Aumenta</a>
+            <table id="example1" class="table table-sm table-hover" style="width:100%">
+              <thead>
+                <tr>
+                <th>#</th>
+                <th>Naran</th>
+                <th>Username</th>
+                <th>Papél</th>
+                <th>Persen Ongkos</th>
+                <th>Ativu</th>
+                <th>Reset</th>
+                <th>Aksaun</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for obj in objects %}
+                <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ obj.emp.name }}</td>
+                <td>{{ obj.user.username }}</td>
+                <td>{{ obj.user.groups.first.name|upper }}</td>
+                <td>{{ obj.emp.persen_ongkos }}%</td>
+                <td>{% if obj.user.is_active %}<i class='fa fa-check-circle text-success'></i>{% else %}<i class='fa fa-times-circle text-muted'></i>{% endif %}</td>
+                <td><a href="{% url 'reset-password' obj.pk %}" class="btn btn-warning btn-sm" onclick="return confirm('Reset password utilizadór ida ne?')">Reset Password</a></td>
+                <td class="text-nowrap">
+                  <a class="btn btn-sm btn-info" href="{% url 'emp-detail' obj.emp.pk %}" title="Haree"><i class="fa fa-eye"></i></a>
+                  {% if group == "admin" %}<a class="btn btn-sm btn-warning" href="{% url 'emp-update' obj.emp.pk %}" title="Edita"><i class="fa fa-edit"></i></a>{% endif %}
+                  {% if group == "admin" %}<a class="btn btn-sm btn-danger" href="{% url 'emp-delete' obj.emp.pk %}" title="Hamoos"><i class="fa fa-trash"></i></a>{% endif %}
+                </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

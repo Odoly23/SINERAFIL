@@ -1,0 +1,20 @@
+{% load static %}<!DOCTYPE html>
+<html lang="tet">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Erru 404 — SINERAFIL</title>
+  <link rel="stylesheet" href="{% static 'main/vendor/bootstrap/css/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'main/css/custom.css' %}">
+</head>
+<body class="auth">
+  <div class="auth-card m-3 text-center">
+    <div class="head"><img src="{% static 'Image/logo.png' %}" alt=""></div>
+    <div class="p-4">
+      <h1 class="display-4 text-maroon">404</h1>
+      <p>Pájina ka dadus ne'ebé ita buka la hetan, ka ita-nia papél la iha direitu asesu.</p>
+      <a href="{% url 'home' %}" class="btn btn-blood">Fila ba Home</a>
+    </div>
+  </div>
+</body>
+</html>

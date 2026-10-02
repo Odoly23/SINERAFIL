@@ -1,0 +1,46 @@
+{% extends "main/layout.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="container-fluid mt-3">
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="card">
+        <div class="card-header">
+          <i class="fa fa-list"> {{legend|upper}}</i>
+        </div>
+        <div class="card-body">
+          <form method="POST">
+            {% csrf_token %}
+            <div class="card shadow-lg pt-1 border-success rounded">
+                <div class="card-header">{{ legend|upper }}</div>
+                <div class="card-body">
+                    {% crispy form %}
+                </div> <!--end card-body-->
+            </div> <!--end card-->
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+(function(){
+  // Filtra lista motór tuir kliente ne'ebé hili
+  var $k = $('#id_kliente'), $m = $('#id_motor');
+  if (!$k.length || !$m.length) return;
+  var all = $m.find('option').clone();
+  function filter(){
+    var kid = $k.val(), cur = $m.val();
+    $m.empty();
+    all.each(function(){
+      var d = $(this).attr('data-kliente');
+      if (!this.value || !kid || d === kid) $m.append($(this).clone());
+    });
+    if ($m.find('option[value="'+cur+'"]').length) $m.val(cur); else $m.val('');
+  }
+  $k.on('change', filter); filter();
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,99 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="tet">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="all,follow">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <title>
+    {% if title %}SINERAFIL - {{ title|upper }}{% else %}SINERAFIL{% endif %}
+  </title>
+
+  <link rel="shortcut icon" href="{% static 'Image/logo.png' %}">
+
+  <!-- ── Vendor CSS (offline) ───────────────────────────────── -->
+  <link rel="stylesheet" href="{% static 'main/vendor/bootstrap/css/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'main/vendor/fontawesome/css/all.min.css' %}">
+  <link rel="stylesheet" href="{% static 'main/vendor/datatables/css/dataTables.bootstrap4.min.css' %}">
+  <link rel="stylesheet" href="{% static 'main/vendor/datatables/css/responsive.bootstrap4.min.css' %}">
+
+  <!-- ── Theme CSS ───────────────────────────────────────────── -->
+  <link rel="stylesheet" href="{% static 'main/css/custom.css' %}">
+
+  {% block head %}{% endblock head %}
+</head>
+
+<body>
+
+  <!-- ── Side Navbar ─────────────────────────────────────────── -->
+  <nav class="side-navbar" id="sidebar">
+    {% include 'main/sidebar.html' %}
+  </nav>
+
+  <div class="page">
+
+    <!-- ── Top Header ──────────────────────────────────────────── -->
+    <header class="header">
+      {% include 'main/navbar.html' %}
+    </header>
+
+    <section>
+
+      <!-- ── Breadcrumb ────────────────────────────────────────── -->
+      <div class="breadcrumb-holder mb-2">
+        <div class="container-fluid">
+          <ul class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+            {% for i in link_antes %}
+              <li class="breadcrumb-item"><a href="{% if i.link_param %}{% url i.link_name i.link_param %}{% else %}{% url i.link_name %}{% endif %}">{{ i.link_text }}</a></li>
+            {% endfor %}
+            <li class="breadcrumb-item active">{{ legend|default:title }}</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ── Messages ──────────────────────────────────────────── -->
+      <div class="container-fluid">
+        {% for m in messages %}
+          <div class="alert alert-{% if m.tags == 'error' %}danger{% else %}{{ m.tags|default:'info' }}{% endif %} alert-dismissible fade show">
+            {{ m }}<button type="button" class="close" data-dismiss="alert">&times;</button>
+          </div>
+        {% endfor %}
+      </div>
+
+      {% block content %}{% endblock content %}
+
+    </section>
+
+    {% include 'main/footer.html' %}
+  </div>
+
+  <!-- ── JS (offline) ───────────────────────────────────────── -->
+  <script src="{% static 'main/vendor/jquery/jquery.min.js' %}"></script>
+  <script src="{% static 'main/vendor/popper/popper.min.js' %}"></script>
+  <script src="{% static 'main/vendor/bootstrap/js/bootstrap.min.js' %}"></script>
+  <script src="{% static 'main/vendor/datatables/js/jquery.dataTables.min.js' %}"></script>
+  <script src="{% static 'main/vendor/datatables/js/dataTables.bootstrap4.min.js' %}"></script>
+  <script src="{% static 'main/vendor/datatables/js/dataTables.responsive.min.js' %}"></script>
+  <script src="{% static 'main/vendor/datatables/js/responsive.bootstrap4.min.js' %}"></script>
+  <script>
+    $('#toggle-sidebar').on('click', function () { $('#sidebar').toggleClass('open'); });
+    $(function () {
+      $('#example1').DataTable({
+        responsive: true,
+        pageLength: 15,
+        lengthMenu: [[15, 30, 50, 100], [15, 30, 50, 100]],
+        order: [],
+        language: {
+          search: 'Buka:', lengthMenu: 'Hatudu _MENU_ dadus', info: 'Hatudu _START_ - _END_ husi _TOTAL_',
+          infoEmpty: 'Seidauk iha dadus', zeroRecords: 'Dadus la hetan', emptyTable: 'Seidauk iha dadus',
+          paginate: { previous: '&laquo;', next: '&raquo;' }
+        }
+      });
+    });
+  </script>
+  {% block scripts %}{% endblock scripts %}
+</body>
+</html>

@@ -1,0 +1,63 @@
+{% extends "main/layout.html" %}
+{% load sinerafil_tags %}
+{% block content %}
+<div class="container-fluid mt-3">
+  <div class="row">
+    <div class="col-lg-5 mb-3">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between"><span><i class="fa fa-wrench"></i> {{ obj.invoice_no }}</span>{{ obj.status|status_badge }}</div>
+        <div class="card-body">
+          <table class="table table-sm table-borderless">
+            <tr><td>Data</td><td>{{ obj.date|date:'d/m/Y' }}</td></tr>
+            <tr><td>Kliente</td><td>{{ obj.kliente.name }} <small class="text-muted">{{ obj.kliente.phone }}</small></td></tr>
+            <tr><td>Motór</td><td>{{ obj.motor.plate }} — {{ obj.motor.brand }} {{ obj.motor.model_name }}</td></tr>
+            <tr><td>Mekániku</td><td>{{ obj.mekanik.name }}</td></tr>
+            <tr><td>Servisu</td><td>{{ obj.complaint|default:'—' }}</td></tr>
+            {% if obj.note %}<tr><td>Nota</td><td>{{ obj.note }}</td></tr>{% endif %}
+          </table>
+          <hr>
+          <table class="table table-sm table-borderless mb-2">
+            <tr><td>Total pesa</td><td class="text-right">{{ obj.total_parts|usd }}</td></tr>
+            <tr><td>Ongkos servisu</td><td class="text-right">{{ obj.labor_cost|usd }}</td></tr>
+            <tr><td>Diskaun</td><td class="text-right">- {{ obj.discount|usd }}</td></tr>
+            <tr class="font-weight-bold"><td>TOTÁL</td><td class="text-right text-maroon h5 mb-0">{{ obj.total|usd }}</td></tr>
+            {% if group != "mekaniku" %}
+            <tr class="text-muted small"><td>Ongkos mekániku ({{ obj.mech_percent }}%)</td><td class="text-right">{{ obj.mech_fee|usd }}</td></tr>
+            <tr class="text-muted small"><td>Lukru ofisina</td><td class="text-right">{{ obj.profit|usd }}</td></tr>
+            {% endif %}
+          </table>
+          <a href="{% url 'nota-servisu' obj.pk %}" target="_blank" class="btn btn-sm btn-primary"><i class="fa fa-print"></i> Nota PDF</a>
+          {% if can_edit %}<a href="{% url 'servisu-edit' obj.pk %}" class="btn btn-sm btn-warning"><i class="fa fa-edit"></i> Edita</a>{% endif %}
+          <a href="{% url 'servisu-list' %}" class="btn btn-sm btn-secondary">Fila</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-7 mb-3">
+      <div class="card">
+        <div class="card-header"><i class="fa fa-cogs"></i> PESA NE'EBÉ UZA</div>
+        <div class="table-responsive">
+          <table class="table table-sm mb-0">
+            <thead><tr><th>Pesa</th><th class="text-right">Kuant.</th><th class="text-right">Folin</th><th class="text-right">Subtotal</th>{% if can_edit %}<th></th>{% endif %}</tr></thead>
+            <tbody>
+            {% for it in obj.items.all %}
+              <tr><td>{{ it.pesa.name }}</td><td class="text-right">{{ it.quantity }}</td><td class="text-right">{{ it.price_sell|usd }}</td><td class="text-right">{{ it.subtotal|usd }}</td>
+                {% if can_edit %}<td class="text-right"><form method="post" action="{% url 'servisu-pesa-remove' obj.pk it.pk %}" onsubmit="return confirm('Hasai pesa ne\'e no fila stock?')">{% csrf_token %}<button class="btn btn-sm btn-outline-danger"><i class="fa fa-times"></i></button></form></td>{% endif %}</tr>
+            {% empty %}<tr><td colspan="5" class="text-center text-muted py-3">Seidauk uza pesa.</td></tr>{% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% if can_edit %}
+        <div class="card-footer bg-white">
+          <form method="post" action="{% url 'servisu-pesa-add' obj.pk %}" class="form-row align-items-end">{% csrf_token %}
+            <div class="col-md-7 mb-2 mb-md-0"><label class="small mb-0">{{ add_form.pesa.label }}</label>{{ add_form.pesa }}</div>
+            <div class="col-md-2 mb-2 mb-md-0"><label class="small mb-0">{{ add_form.quantity.label }}</label>{{ add_form.quantity }}</div>
+            <div class="col-md-3"><button class="btn btn-blood btn-block"><i class="fa fa-plus"></i> Aumenta</button></div>
+          </form>
+          <small class="text-muted">Stock sei redús automátiku bainhira aumenta pesa.</small>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

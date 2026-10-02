@@ -1,0 +1,48 @@
+{% extends "main/layout.html" %}
+{% load sinerafil_tags %}
+{% block content %}
+<div class="container-fluid mt-3">
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="card">
+        <div class="card-header">
+          <i class="fa fa-list"> {{legend|upper}}</i>
+        </div>
+        <div class="card-body">
+          
+          <div class="table-responsive">
+            {% if group == "admin" or group == "mekaniku" %}<a class="btn btn-primary btn-sm mb-2" href="{% url 'kliente-add' %}"><i class="fa fa-plus"></i> Aumenta</a>{% endif %}
+            <table id="example1" class="table table-sm table-hover" style="width:100%">
+              <thead>
+                <tr>
+                <th>#</th>
+                <th>Naran</th>
+                <th>Telefone</th>
+                <th>Enderesu</th>
+                <th>Motór</th>
+                <th>Aksaun</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for obj in objects %}
+                <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ obj.name }}</td>
+                <td>{{ obj.phone|default:'—' }}</td>
+                <td>{{ obj.address|default:'—' }}</td>
+                <td>{{ obj.motors.count }}</td>
+                <td class="text-nowrap">
+                  {% if group == "admin" or group == "mekaniku" %}<a class="btn btn-sm btn-warning" href="{% url 'kliente-edit' obj.pk %}" title="Edita"><i class="fa fa-edit"></i></a>{% endif %}
+                  {% if group == "admin" %}<a class="btn btn-sm btn-danger" href="{% url 'kliente-delete' obj.pk %}" title="Hamoos"><i class="fa fa-trash"></i></a>{% endif %}
+                </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

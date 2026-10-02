@@ -1,0 +1,68 @@
+{% extends "main/layout.html" %}
+{% load static sinerafil_tags %}
+{% block content %}
+<div class="container-fluid mt-3">
+  <div class="row">
+    <div class="col-sm-6 col-xl-3 mb-3"><div class="stat-card stat-1"><div class="small">Total pesa ativu</div><div class="num">{{ n_pesa }}</div><i class="fa fa-cogs"></i></div></div>
+    <div class="col-sm-6 col-xl-3 mb-3"><div class="stat-card stat-2"><div class="small">Stock mínimu</div><div class="num">{{ n_stock_low }}</div><i class="fa fa-exclamation-triangle"></i></div></div>
+    <div class="col-sm-6 col-xl-3 mb-3"><div class="stat-card stat-3"><div class="small">Servisu fulan ne'e</div><div class="num">{{ n_servisu_fulan }}</div><i class="fa fa-wrench"></i></div></div>
+    {% if show_finance %}
+    <div class="col-sm-6 col-xl-3 mb-3"><div class="stat-card stat-4"><div class="small">Rendimentu fulan ne'e</div><div class="num">{{ revenue_month|usd }}</div><i class="fa fa-dollar-sign"></i></div></div>
+    {% else %}
+    <div class="col-sm-6 col-xl-3 mb-3"><div class="stat-card stat-4"><div class="small">Servisu seidauk remata</div><div class="num">{{ n_servisu_pendente }}</div><i class="fa fa-hourglass-half"></i></div></div>
+    {% endif %}
+  </div>
+
+  {% if n_stock_low %}
+  <div class="alert alert-warning"><i class="fa fa-exclamation-triangle"></i> <strong>Alerta stock!</strong> Pesa {{ n_stock_low }} to'o ona stock mínimu.
+    <a href="{% url 'pesa-list' %}?low=1" class="alert-link">Haree lista</a></div>
+  {% endif %}
+
+  <div class="row">
+    {% if show_finance %}
+    <div class="col-lg-8 mb-3"><div class="card"><div class="card-header">RENDIMENTU NO LUKRU (6 FULAN IKUS) <small class="text-muted">· Valór stock: {{ stock_value|usd }}</small></div>
+      <div class="card-body"><canvas id="chMonthly" height="110"></canvas></div></div></div>
+    {% else %}
+    <div class="col-lg-8 mb-3"><div class="card"><div class="card-header">PESA UZA BARAK LIU</div><div class="card-body"><canvas id="chTop" height="110"></canvas></div></div></div>
+    {% endif %}
+    <div class="col-lg-4 mb-3"><div class="card"><div class="card-header">STATUS SERVISU</div>
+      <div class="card-body"><canvas id="chStatus" height="200"></canvas></div></div></div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-7 mb-3"><div class="card"><div class="card-header">SERVISU FOUN</div>
+      <div class="table-responsive"><table class="table table-sm mb-0">
+        <thead><tr><th>Nota</th><th>Kliente</th><th>Motór</th><th>Status</th><th class="text-right">Total</th></tr></thead>
+        <tbody>{% for s in recent %}
+          <tr><td><a href="{% url 'servisu-detail' s.pk %}">{{ s.invoice_no }}</a></td><td>{{ s.kliente.name }}</td><td>{{ s.motor.plate }}</td><td>{{ s.status|status_badge }}</td><td class="text-right">{{ s.total|usd }}</td></tr>
+        {% empty %}<tr><td colspan="5" class="text-center text-muted py-3">Seidauk iha servisu.</td></tr>{% endfor %}</tbody></table></div></div></div>
+    <div class="col-lg-5 mb-3"><div class="card"><div class="card-header">PESA HO STOCK MÍNIMU</div>
+      <ul class="list-group list-group-flush">
+        {% for p in low_items %}<li class="list-group-item d-flex justify-content-between py-2"><a href="{% url 'pesa-detail' p.pk %}">{{ p.name|truncatechars:38 }}</a><span class="badge badge-danger align-self-center">{{ p.stock }}</span></li>
+        {% empty %}<li class="list-group-item text-muted text-center">Stock hotu seguru.</li>{% endfor %}
+      </ul></div></div>
+  </div>
+</div>
+{{ chart_data|json_script:'chart-data' }}
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'main/vendor/chartjs/Chart.min.js' %}"></script>
+<script>
+(function(){
+  var d = JSON.parse(document.getElementById('chart-data').textContent);
+  var red='#b3001b', maroon='#5c0a14', pink='#e08a93';
+  if (document.getElementById('chMonthly')) {
+    new Chart(document.getElementById('chMonthly'), { type:'bar', data:{ labels:d.months, datasets:[
+      {label:'Rendimentu (USD)', data:d.revenue, backgroundColor:red},
+      {label:'Lukru líkidu (USD)', data:d.profit, type:'line', borderColor:maroon, backgroundColor:'rgba(92,10,20,.1)', fill:false, lineTension:.25}
+    ]}, options:{ scales:{ yAxes:[{ticks:{beginAtZero:true}}] } } });
+  }
+  if (document.getElementById('chTop')) {
+    new Chart(document.getElementById('chTop'), { type:'horizontalBar', data:{ labels:d.top_labels, datasets:[{label:'Kuantidade uza', data:d.top_values, backgroundColor:red}] },
+      options:{ scales:{ xAxes:[{ticks:{beginAtZero:true, precision:0}}] } } });
+  }
+  new Chart(document.getElementById('chStatus'), { type:'doughnut', data:{ labels:d.status_labels, datasets:[{ data:d.status_values, backgroundColor:[pink, red, maroon] }] },
+    options:{ legend:{position:'bottom'} } });
+})();
+</script>
+{% endblock %}

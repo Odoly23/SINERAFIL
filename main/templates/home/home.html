@@ -1,0 +1,18 @@
+{% extends "main/layout.html" %}
+{% block content %}
+<div class="container-fluid mt-3">
+  <div class="card">
+    <div class="card-header"><i class="fa fa-home"></i> {{ legend|upper }}</div>
+    <div class="card-body">
+      <h4 class="text-maroon">Bondia, {{ user.get_full_name|default:user.username }}!</h4>
+      <p class="text-muted">Ita tama ho papél <strong>{{ group|upper }}</strong>. Hili menu iha sidebar atu hahú servisu.</p>
+      {% if alerta_stock %}
+      <div class="alert alert-warning"><i class="fa fa-exclamation-triangle"></i> Pesa {{ alerta_stock }} to'o ona stock mínimu.
+        <a href="{% url 'pesa-list' %}?low=1" class="alert-link">Haree lista</a></div>
+      {% endif %}
+      <a href="{% url 'dashboard' %}" class="btn btn-blood"><i class="fa fa-tachometer-alt"></i> Dashboard</a>
+      <a href="{% url 'servisu-list' %}" class="btn btn-maroon"><i class="fa fa-wrench"></i> Servisu</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

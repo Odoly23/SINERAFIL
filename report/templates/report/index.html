@@ -1,0 +1,28 @@
+{% extends "main/layout.html" %}
+{% block content %}
+<div class="container-fluid mt-3">
+  <div class="card" style="max-width: 860px;">
+    <div class="card-header"><i class="fa fa-file-pdf"></i> {{ legend|upper }}</div>
+    <div class="card-body">
+      <form method="get" target="_blank" novalidate>
+        {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+        <div class="form-row">
+          <div class="form-group col-12"><label>{{ form.tipu.label }}</label>{{ form.tipu }}</div>
+          <div class="form-group col-md-6"><label>{{ form.date_from.label }}</label>{{ form.date_from }}</div>
+          <div class="form-group col-md-6"><label>{{ form.date_to.label }}</label>{{ form.date_to }}</div>
+          <div class="form-group col-12" id="mov-box"><label>{{ form.movimentu.label }}</label>{{ form.movimentu }}</div>
+        </div>
+        <p class="small text-muted">Relatóriu stock uza stock atuál (la presiza períodu). Relatóriu finanseiru uza de'it servisu ho status <b>Remata</b>.</p>
+        <button class="btn btn-blood"><i class="fa fa-file-pdf"></i> Hamosu PDF</button>
+        <button class="btn btn-outline-secondary" name="download" value="1"><i class="fa fa-download"></i> Download</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  function sync(){ $('#mov-box').toggle($('#id_tipu').val()==='movimentu'); }
+  $('#id_tipu').on('change', sync); sync();
+</script>
+{% endblock %}

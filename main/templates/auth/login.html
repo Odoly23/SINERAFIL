@@ -1,0 +1,33 @@
+{% load static %}<!DOCTYPE html>
+<html lang="tet">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title }} — SINERAFIL</title>
+  <link rel="shortcut icon" href="{% static 'Image/logo.png' %}">
+  <link rel="stylesheet" href="{% static 'main/vendor/bootstrap/css/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'main/vendor/fontawesome/css/all.min.css' %}">
+  <link rel="stylesheet" href="{% static 'main/css/custom.css' %}">
+</head>
+<body class="auth">
+  <div class="auth-card m-3">
+    <div class="head">
+      <img src="{% static 'Image/logo.png' %}" alt="{{ SHOP_NAME }}">
+      <div class="mt-2 font-weight-bold">{{ SHOP_NAME }}</div>
+      <small>Sistema Jestaun Inventáriu & Reparasaun</small>
+    </div>
+    <form method="post" class="p-4">
+      {% csrf_token %}
+      {% for m in messages %}
+        <div class="alert alert-{% if m.tags == 'error' %}danger{% else %}{{ m.tags|default:'info' }}{% endif %} py-2">{{ m }}</div>
+      {% endfor %}
+      <div class="form-group"><label for="username">Naran utilizadór</label>
+        <input type="text" name="username" id="username" class="form-control" autofocus required></div>
+      <div class="form-group"><label for="password">Password</label>
+        <input type="password" name="password" id="password" class="form-control" required></div>
+      <button type="submit" class="btn btn-blood btn-block"><i class="fa fa-sign-in-alt"></i> Tama</button>
+      <a href="{% url 'landing' %}" class="d-block text-center small mt-3">&larr; Fila ba pájina inísiu</a>
+    </form>
+  </div>
+</body>
+</html>

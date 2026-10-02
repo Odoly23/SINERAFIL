@@ -1,0 +1,62 @@
+{% extends "main/layout.html" %}
+{% load sinerafil_tags %}
+{% block content %}
+<div class="container-fluid mt-3">
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="card">
+        <div class="card-header">
+          <i class="fa fa-list"> {{legend|upper}}</i>
+        </div>
+        <div class="card-body">
+          <div class="mb-2">
+            {% if group == "admin" or group == "mekaniku" %}<a class="btn btn-primary btn-sm" href="{% url 'servisu-add' %}"><i class="fa fa-plus"></i> Servisu Foun</a>{% endif %}
+            <a class="btn btn-sm {% if not status %}btn-secondary{% else %}btn-outline-secondary{% endif %}" href="{% url 'servisu-list' %}">Hotu</a>
+            {% for key, label in status_choices %}
+            <a class="btn btn-sm {% if status == key %}btn-maroon{% else %}btn-outline-secondary{% endif %}" href="?status={{ key }}">{{ label }}</a>
+            {% endfor %}
+          </div>
+          <div class="table-responsive">
+            <table id="example1" class="table table-sm table-hover" style="width:100%">
+              <thead>
+                <tr>
+                <th>#</th>
+                <th>Nú. Nota</th>
+                <th>Data</th>
+                <th>Kliente</th>
+                <th>Motór</th>
+                <th>Mekániku</th>
+                <th>Status</th>
+                <th>Total</th>
+                <th>Aksaun</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for obj in objects %}
+                <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ obj.invoice_no }}</td>
+                <td data-order="{{ obj.date|date:'Y-m-d' }}">{{ obj.date|date:'d/m/Y' }}</td>
+                <td>{{ obj.kliente.name }}</td>
+                <td>{{ obj.motor.plate }}</td>
+                <td>{{ obj.mekanik.name }}</td>
+                <td>{{ obj.status|status_badge }}</td>
+                <td data-order="{{ obj.total }}">{{ obj.total|usd }}</td>
+                <td class="text-nowrap">
+                  <a class="btn btn-sm btn-info" href="{% url 'servisu-detail' obj.pk %}" title="Haree"><i class="fa fa-eye"></i></a>
+                  <a class="btn btn-sm btn-primary" href="{% url 'nota-servisu' obj.pk %}" target="_blank" title="Nota PDF"><i class="fa fa-print"></i></a>
+                  {% if group == "admin" %}
+                  <a class="btn btn-sm btn-danger" href="{% url 'servisu-delete' obj.pk %}" title="Hamoos"><i class="fa fa-trash"></i></a>
+                  {% endif %}
+                </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

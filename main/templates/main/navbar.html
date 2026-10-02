@@ -1,0 +1,16 @@
+<div class="d-flex align-items-center">
+  <button class="btn btn-sm btn-outline-light d-lg-none mr-2" id="toggle-sidebar"><i class="fa fa-bars"></i></button>
+  <h1 class="h5 mb-0">{{ title }}</h1>
+  <div class="ml-auto dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+      <i class="fa fa-user-circle"></i> {{ user.get_full_name|default:user.username }}
+      <span class="badge badge-light ml-1">{{ group|upper }}</span>
+    </a>
+    <div class="dropdown-menu dropdown-menu-right">
+      <a class="dropdown-item" href="{% url 'UserProfile' %}"><i class="fa fa-user mr-2"></i>Profile</a>
+      <a class="dropdown-item" href="{% url 'change-password' %}"><i class="fa fa-key mr-2"></i>Troka password</a>
+      <div class="dropdown-divider"></div>
+      <a class="dropdown-item" href="{% url 'logout' %}"><i class="fa fa-sign-out-alt mr-2"></i>Sai</a>
+    </div>
+  </div>
+</div>
