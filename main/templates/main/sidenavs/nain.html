@@ -1,14 +1,14 @@
 <h5 class="sidenav-heading">Menu Prinsipál</h5>
 <ul class="side-menu list-unstyled">
-  <li><a href="{% url 'dashboard' %}" class="{% if request.path == '/Relatoriu/dashboard/' %}active{% endif %}"><i class="fa fa-tachometer-alt"></i> Dashboard</a></li>
-  <li><a href="{% url 'pesa-list' %}" class="{% if '/Pesa/' in request.path and 'movimentu' not in request.path %}active{% endif %}"><i class="fa fa-cogs"></i> Pesa-Rezerva {% if alerta_stock %}<span class="badge badge-warning ml-1">{{ alerta_stock }}</span>{% endif %}</a></li>
-  <li><a href="{% url 'movimentu-list' %}" class="{% if 'movimentu' in request.path %}active{% endif %}"><i class="fa fa-exchange-alt"></i> Sasán Tama / Sai</a></li>
-  <li><a href="{% url 'servisu-list' %}" class="{% if '/Servisu/' in request.path and 'despeza' not in request.path %}active{% endif %}"><i class="fa fa-wrench"></i> Servisu</a></li>
-  <li><a href="{% url 'kliente-list' %}" class="{% if '/Kliente/' in request.path and 'motor' not in request.path %}active{% endif %}"><i class="fa fa-users"></i> Kliente</a></li>
-  <li><a href="{% url 'motor-list' %}" class="{% if '/Kliente/motor' in request.path %}active{% endif %}"><i class="fa fa-motorcycle"></i> Motór</a></li>
+  <li><a href="{% url 'dashboard' %}" class="{% if request.path == '/Relatoriu/dashboard/' %}active{% endif %}"><i class="fa fa-tachometer-alt"></i><span class="menu-text"> Dashboard</span></a></li>
+  <li><a href="{% url 'pesa-list' %}" class="{% if '/Pesa/' in request.path and 'movimentu' not in request.path %}active{% endif %}"><i class="fa fa-cogs"></i><span class="menu-text"> Pesa-Rezerva</span>{% if alerta_stock %}<span class="badge badge-warning menu-badge">{{ alerta_stock }}</span>{% endif %}</a></li>
+  <li><a href="{% url 'movimentu-list' %}" class="{% if 'movimentu' in request.path %}active{% endif %}"><i class="fa fa-exchange-alt"></i><span class="menu-text"> Sasán Tama / Sai</span></a></li>
+  <li><a href="{% url 'servisu-list' %}" class="{% if '/Servisu/' in request.path and 'despeza' not in request.path %}active{% endif %}"><i class="fa fa-wrench"></i><span class="menu-text"> Servisu</span></a></li>
+  <li><a href="{% url 'kliente-list' %}" class="{% if '/Kliente/' in request.path and 'motor' not in request.path %}active{% endif %}"><i class="fa fa-users"></i><span class="menu-text"> Kliente</span></a></li>
+  <li><a href="{% url 'motor-list' %}" class="{% if '/Kliente/motor' in request.path %}active{% endif %}"><i class="fa fa-motorcycle"></i><span class="menu-text"> Motór</span></a></li>
 </ul>
 <h5 class="sidenav-heading">Finanseiru</h5>
 <ul class="side-menu list-unstyled">
-  <li><a href="{% url 'despeza-list' %}" class="{% if 'despeza' in request.path %}active{% endif %}"><i class="fa fa-money-bill-wave"></i> Despeza</a></li>
-  <li><a href="{% url 'relatoriu' %}" class="{% if request.path == '/Relatoriu/' %}active{% endif %}"><i class="fa fa-file-pdf"></i> Relatóriu PDF</a></li>
+  <li><a href="{% url 'despeza-list' %}" class="{% if 'despeza' in request.path %}active{% endif %}"><i class="fa fa-money-bill-wave"></i><span class="menu-text"> Despeza</span></a></li>
+  <li><a href="{% url 'relatoriu' %}" class="{% if request.path == '/Relatoriu/' %}active{% endif %}"><i class="fa fa-file-pdf"></i><span class="menu-text"> Relatóriu PDF</span></a></li>
 </ul>

@@ -79,7 +79,8 @@
   <script src="{% static 'main/vendor/datatables/js/dataTables.responsive.min.js' %}"></script>
   <script src="{% static 'main/vendor/datatables/js/responsive.bootstrap4.min.js' %}"></script>
   <script>
-    $('#toggle-sidebar').on('click', function () { $('#sidebar').toggleClass('open'); });
+    $('#toggle-sidebar').on('click', function (e) { e.stopPropagation(); $('#sidebar').toggleClass('open'); });
+    $('.page').on('click', function () { $('#sidebar').removeClass('open'); });
     $(function () {
       $('#example1').DataTable({
         responsive: true,

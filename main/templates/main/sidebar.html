@@ -3,7 +3,7 @@
   <!-- Sidebar Header -->
   <div class="sidenav-header">
     <a href="{% url 'home' %}"><img src="{% static 'Image/logo.png' %}" alt="{{ SHOP_NAME }}"></a>
-    <span>{{ SHOP_NAME }} · {{ group|upper }}</span>
+    <span class="menu-text">{{ SHOP_NAME }} · {{ group|upper }}</span>
   </div>
   <!-- Sidebar Navigation Menus -->
   {% if user.is_authenticated %}
@@ -16,8 +16,8 @@
     {% endif %}
     <h5 class="sidenav-heading">Konta</h5>
     <ul class="side-menu list-unstyled">
-      <li><a href="{% url 'UserProfile' %}"><i class="fa fa-user"></i> Profile</a></li>
-      <li><a href="{% url 'logout' %}"><i class="fa fa-sign-out-alt"></i> Sai</a></li>
+      <li><a href="{% url 'UserProfile' %}"><i class="fa fa-user"></i><span class="menu-text"> Profile</span></a></li>
+      <li><a href="{% url 'logout' %}"><i class="fa fa-sign-out-alt"></i><span class="menu-text"> Sai</span></a></li>
     </ul>
   {% endif %}
 </div>

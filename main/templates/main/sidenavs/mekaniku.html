@@ -1,8 +1,8 @@
 <h5 class="sidenav-heading">Menu Prinsipál</h5>
 <ul class="side-menu list-unstyled">
-  <li><a href="{% url 'dashboard' %}" class="{% if request.path == '/Relatoriu/dashboard/' %}active{% endif %}"><i class="fa fa-tachometer-alt"></i> Dashboard</a></li>
-  <li><a href="{% url 'servisu-list' %}" class="{% if '/Servisu/' in request.path %}active{% endif %}"><i class="fa fa-wrench"></i> Servisu Hau-nian</a></li>
-  <li><a href="{% url 'pesa-list' %}" class="{% if '/Pesa/' in request.path %}active{% endif %}"><i class="fa fa-cogs"></i> Pesa-Rezerva {% if alerta_stock %}<span class="badge badge-warning ml-1">{{ alerta_stock }}</span>{% endif %}</a></li>
-  <li><a href="{% url 'kliente-list' %}" class="{% if '/Kliente/' in request.path and 'motor' not in request.path %}active{% endif %}"><i class="fa fa-users"></i> Kliente</a></li>
-  <li><a href="{% url 'motor-list' %}" class="{% if '/Kliente/motor' in request.path %}active{% endif %}"><i class="fa fa-motorcycle"></i> Motór</a></li>
+  <li><a href="{% url 'dashboard' %}" class="{% if request.path == '/Relatoriu/dashboard/' %}active{% endif %}"><i class="fa fa-tachometer-alt"></i><span class="menu-text"> Dashboard</span></a></li>
+  <li><a href="{% url 'servisu-list' %}" class="{% if '/Servisu/' in request.path %}active{% endif %}"><i class="fa fa-wrench"></i><span class="menu-text"> Servisu Hau-nian</span></a></li>
+  <li><a href="{% url 'pesa-list' %}" class="{% if '/Pesa/' in request.path %}active{% endif %}"><i class="fa fa-cogs"></i><span class="menu-text"> Pesa-Rezerva</span>{% if alerta_stock %}<span class="badge badge-warning menu-badge">{{ alerta_stock }}</span>{% endif %}</a></li>
+  <li><a href="{% url 'kliente-list' %}" class="{% if '/Kliente/' in request.path and 'motor' not in request.path %}active{% endif %}"><i class="fa fa-users"></i><span class="menu-text"> Kliente</span></a></li>
+  <li><a href="{% url 'motor-list' %}" class="{% if '/Kliente/motor' in request.path %}active{% endif %}"><i class="fa fa-motorcycle"></i><span class="menu-text"> Motór</span></a></li>
 </ul>
