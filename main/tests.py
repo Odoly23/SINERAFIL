@@ -177,3 +177,118 @@ class ReportTests(BaseCase):
             self.assertTrue(r.content.startswith(b'%PDF'))
         r = self.client.get(reverse('nota-servisu', args=[self.servisu.pk]))
         self.assertTrue(r.content.startswith(b'%PDF'))
+
+
+class KiosTests(BaseCase):
+    def setUp(self):
+        self.pesa.refresh_from_db()   # objek kelas bisa stale (stok diubah lewat register_movement)
+        self.pesa.barcode = '8990000000012'
+        self.pesa.save()
+        self.pesa2 = Pesa.objects.create(code='P2', name='Busi Y', price_buy=1, price_sell=2.5, stock_min=1)
+        register_movement(self.pesa2, MovimentuStock.TAMA, 5)
+
+    def cart(self, *pairs):
+        import json
+        return json.dumps([{'pesa': p.pk, 'qty': q} for p, q in pairs])
+
+    def checkout(self, cart, paid, discount='0', **extra):
+        self.login(self.admin)
+        return self.client.post(reverse('kios-checkout'), dict(cart=cart, paid=paid, discount=discount, **extra))
+
+    def test_scan_by_barcode_and_code(self):
+        self.login(self.admin)
+        r = self.client.get(reverse('kios-scan'), {'q': '8990000000012'})
+        self.assertEqual(r.json()['code'], 'P1')
+        r = self.client.get(reverse('kios-scan'), {'q': 'p2'})
+        self.assertEqual(r.json()['price'], '2.50')
+        r = self.client.get(reverse('kios-scan'), {'q': 'tidak-ada'})
+        self.assertEqual(r.status_code, 404)
+
+    def test_cari_by_name(self):
+        self.login(self.admin)
+        r = self.client.get(reverse('kios-cari'), {'q': 'Busi'})
+        self.assertEqual([x['code'] for x in r.json()['results']], ['P2'])
+
+    def test_sale_change_and_stock(self):
+        r = self.checkout(self.cart((self.pesa, 2), (self.pesa2, 1)), paid='30', discount='1.50')
+        self.assertEqual(r.status_code, 200, r.content)
+        data = r.json()
+        # 2*12 + 2.5 = 26.5 - 1.5 = 25 ; bayar 30 -> kembali 5
+        self.assertEqual(data['total'], '25.00')
+        self.assertEqual(data['change'], '5.00')
+        self.pesa.refresh_from_db(); self.pesa2.refresh_from_db()
+        self.assertEqual((self.pesa.stock, self.pesa2.stock), (8, 4))
+        from kios.models import Faan
+        f = Faan.objects.get()
+        self.assertTrue(f.invoice_no.startswith('KIO-'))
+        self.assertEqual(f.profit, Decimal('2') * 7 + Decimal('1.5') - Decimal('1.5'))
+        self.assertEqual(MovimentuStock.objects.filter(faan=f, tipu='sai').count(), 2)
+
+    def test_insufficient_payment_rejected(self):
+        r = self.checkout(self.cart((self.pesa, 1)), paid='10')
+        self.assertEqual(r.status_code, 400)
+        self.pesa.refresh_from_db()
+        self.assertEqual(self.pesa.stock, 10)
+
+    def test_over_stock_rejected_atomic(self):
+        r = self.checkout(self.cart((self.pesa2, 2), (self.pesa, 99)), paid='5000')
+        self.assertEqual(r.status_code, 400)
+        self.pesa2.refresh_from_db()
+        self.assertEqual(self.pesa2.stock, 5)   # transaksi dibatalkan semua
+        from kios.models import Faan
+        self.assertEqual(Faan.objects.count(), 0)
+
+    def test_server_uses_db_price_not_client(self):
+        import json
+        cart = json.dumps([{'pesa': self.pesa.pk, 'qty': 1, 'price': '0.01'}])
+        r = self.checkout(cart, paid='5')
+        self.assertEqual(r.status_code, 400)    # harga 12, bukan 0.01
+
+    def test_void_restores_stock(self):
+        self.checkout(self.cart((self.pesa, 3)), paid='36')
+        from kios.models import Faan
+        f = Faan.objects.get()
+        self.pesa.refresh_from_db(); self.assertEqual(self.pesa.stock, 7)
+        self.login(self.admin)
+        self.client.post(reverse('faan-void', args=[f.pk]))
+        self.pesa.refresh_from_db(); self.assertEqual(self.pesa.stock, 10)
+        f.refresh_from_db(); self.assertEqual(f.status, 'anulada')
+        self.client.post(reverse('faan-void', args=[f.pk]))   # anula dua kali -> tidak menambah stok lagi
+        self.pesa.refresh_from_db(); self.assertEqual(self.pesa.stock, 10)
+
+    def test_pages_and_documents(self):
+        self.checkout(self.cart((self.pesa, 1)), paid='12')
+        from kios.models import Faan
+        f = Faan.objects.get()
+        self.login(self.admin)
+        for name, args in [('kios', []), ('faan-list', []), ('faan-detail', [f.pk]), ('faan-struk', [f.pk])]:
+            self.assertEqual(self.client.get(reverse(name, args=args)).status_code, 200, name)
+        r = self.client.get(reverse('faan-pdf', args=[f.pk]))
+        self.assertTrue(r.content.startswith(b'%PDF'))
+        r = self.client.get(reverse('pesa-label'))
+        self.assertTrue(r.content.startswith(b'%PDF'))
+        r = self.client.get(reverse('pesa-label') + '?pk=%s&n=5' % self.pesa.pk)
+        self.assertTrue(r.content.startswith(b'%PDF'))
+        r = self.client.get(reverse('relatoriu') + '?tipu=finanseiru&date_from=2020-01-01&date_to=2100-01-01')
+        self.assertTrue(r.content.startswith(b'%PDF'))
+
+    def test_only_admin_can_use_kios(self):
+        for user in (self.mek, self.nain):
+            for name in ['kios', 'faan-list', 'kios-scan', 'kios-cari']:
+                self.login(user)
+                self.assertEqual(self.client.get(reverse(name)).status_code, 403, (user, name))
+            r = self.client.post(reverse('kios-checkout'), {'cart': self.cart((self.pesa, 1)), 'paid': '50'})
+            self.assertEqual(r.status_code, 403)
+        self.pesa.refresh_from_db()
+        self.assertEqual(self.pesa.stock, 10)
+
+    def test_barcode_unique_and_optional(self):
+        self.login(self.admin)
+        base = {'code': 'N1', 'name': 'Baru', 'unit': 'pcs', 'price_buy': '1', 'price_sell': '2', 'stock_min': '1',
+                'is_active': 'on', 'barcode': ''}
+        r = self.client.post(reverse('pesa-add'), base)
+        self.assertEqual(r.status_code, 302)
+        r = self.client.post(reverse('pesa-add'), dict(base, code='N2', name='Baru2'))   # dua barcode kosong ok
+        self.assertEqual(r.status_code, 302)
+        r = self.client.post(reverse('pesa-add'), dict(base, code='N3', barcode='8990000000012'))
+        self.assertEqual(r.status_code, 200)   # barcode duplikat ditolak

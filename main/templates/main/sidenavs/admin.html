@@ -8,6 +8,11 @@
   <li><a href="{% url 'kategoria-list' %}" class="{% if 'kategoria' in request.path %}active{% endif %}"><i class="fa fa-tags"></i><span class="menu-text"> Kategoria</span></a></li>
   <li><a href="{% url 'movimentu-list' %}" class="{% if 'movimentu' in request.path %}active{% endif %}"><i class="fa fa-exchange-alt"></i><span class="menu-text"> Sasán Tama / Sai</span></a></li>
 </ul>
+<h5 class="sidenav-heading">Kios</h5>
+<ul class="side-menu list-unstyled">
+  <li><a href="{% url 'kios' %}" class="{% if request.path == '/Kios/' %}active{% endif %}"><i class="fa fa-cash-register"></i><span class="menu-text"> Kios (Faan Sasán)</span></a></li>
+  <li><a href="{% url 'faan-list' %}" class="{% if '/Kios/istoria' in request.path or '/Kios/detail' in request.path %}active{% endif %}"><i class="fa fa-receipt"></i><span class="menu-text"> Istória Faan</span></a></li>
+</ul>
 <h5 class="sidenav-heading">Operasaun</h5>
 <ul class="side-menu list-unstyled">
   <li><a href="{% url 'servisu-list' %}" class="{% if '/Servisu/' in request.path and 'despeza' not in request.path %}active{% endif %}"><i class="fa fa-wrench"></i><span class="menu-text"> Servisu</span></a></li>

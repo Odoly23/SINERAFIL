@@ -11,7 +11,7 @@ from pesa.utils import StockError, register_movement
 @login_required
 @allowed_users(allowed_roles=['admin', 'nain'])
 def movimentu_list(request):
-    objects = MovimentuStock.objects.select_related('pesa', 'servisu')
+    objects = MovimentuStock.objects.select_related('pesa', 'servisu', 'faan')
     tipu = request.GET.get('tipu', '')
     if tipu in (MovimentuStock.TAMA, MovimentuStock.SAI):
         objects = objects.filter(tipu=tipu)

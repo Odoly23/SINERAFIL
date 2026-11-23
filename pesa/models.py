@@ -8,6 +8,8 @@ from custom.models import BaseModel, Kategoria
 
 class Pesa(BaseModel):
     code = models.CharField(max_length=40, unique=True, verbose_name='Kódigu')
+    barcode = models.CharField(max_length=64, unique=True, null=True, blank=True, verbose_name='Barcode',
+                               help_text="Opsionál: barcode fábrika. Scanner bele uza kódigu pesa mós.")
     name = models.CharField(max_length=200, verbose_name='Naran Pesa')
     kategoria = models.ForeignKey(Kategoria, null=True, blank=True, on_delete=models.SET_NULL,
                                   related_name='pesa', verbose_name='Kategoria')
@@ -53,6 +55,8 @@ class MovimentuStock(BaseModel):
     note = models.TextField(blank=True, verbose_name='Nota')
     servisu = models.ForeignKey('servisu.Servisu', null=True, blank=True, on_delete=models.SET_NULL,
                                 related_name='movimentu')
+    faan = models.ForeignKey('kios.Faan', null=True, blank=True, on_delete=models.SET_NULL,
+                             related_name='movimentu')
 
     class Meta:
         ordering = ['-date', '-id']

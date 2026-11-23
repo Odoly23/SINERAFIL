@@ -16,6 +16,7 @@ urlpatterns = [
     path('Pesa/', include('pesa.urls')),
     path('Kliente/', include('cliente.urls')),
     path('Servisu/', include('servisu.urls')),
+    path('Kios/', include('kios.urls')),
     path('Relatoriu/', include('report.urls')),
 ]
 if settings.DEBUG:

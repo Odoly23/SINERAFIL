@@ -90,3 +90,27 @@ body.auth { min-height: 100vh; background: radial-gradient(circle at 20% 20%, #b
 .feature { background: #fff; border-radius: .6rem; padding: 1.5rem; height: 100%; box-shadow: 0 2px 10px rgba(92,10,20,.1); border-top: 4px solid var(--blood-bright); }
 .feature i { font-size: 1.8rem; color: var(--blood-bright); }
 .landing-footer { background: #000; color: rgba(255,255,255,.75); padding: 1.5rem 0; }
+
+/* ---- Kios (POS) */
+.btn-outline-maroon { color: var(--maroon); border-color: var(--maroon); }
+.btn-outline-maroon:hover { background: var(--maroon); color: #fff; }
+.pos-toast { position: fixed; top: 70px; right: 16px; z-index: 2000; width: 340px; max-width: calc(100% - 32px); }
+.pos-results { position: absolute; left: 0; right: 0; top: 100%; z-index: 20; max-height: 280px; overflow-y: auto; box-shadow: 0 6px 18px rgba(0,0,0,.2); }
+.pos-cart tbody td { vertical-align: middle; }
+.qty-group { width: 118px; margin: 0 auto; }
+.qty-group input { min-width: 40px; padding: .2rem; -moz-appearance: textfield; }
+.qty-group input::-webkit-outer-spin-button, .qty-group input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.pos-total { background: var(--maroon); color: #fff; border-radius: .4rem; padding: .6rem .9rem; font-size: 1.9rem; font-weight: 800; }
+.pos-total span:first-child { font-size: 1rem; font-weight: 600; letter-spacing: .06em; }
+.quick-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .35rem; }
+.quick-grid .btn:first-child { grid-column: span 2; }
+.pos-change-row { background: #f3f6f3; border-radius: .4rem; padding: .5rem .8rem; }
+.pos-change { font-size: 1.7rem; font-weight: 800; }
+.pos-change.ok { color: #1e7e34; } .pos-change.bad { color: #c82333; font-size: 1.2rem; }
+@media (min-width: 992px) { .pos-sticky { position: sticky; top: 12px; } }
+@media (max-width: 575.98px) { .pos-total { font-size: 1.6rem; } .quick-grid { grid-template-columns: repeat(3, 1fr); } .quick-grid .btn:first-child { grid-column: span 3; } }
+@media (max-width: 575.98px) {
+  .pos-cart td, .pos-cart th { padding: .4rem .3rem; }
+  .qty-group { width: 100px; }
+  .qty-group .btn { padding: .15rem .4rem; }
+}

@@ -41,7 +41,7 @@
                 <td>{{ obj.price|usd }}</td>
                 <td>{{ obj.total|usd }}</td>
                 <td>{{ obj.reference|default:'—' }}</td>
-                <td>{% if obj.servisu %}<a href="{% url 'servisu-detail' obj.servisu.pk %}">{{ obj.servisu.invoice_no }}</a>{% else %}—{% endif %}</td>
+                <td>{% if obj.servisu %}<a href="{% url 'servisu-detail' obj.servisu.pk %}">{{ obj.servisu.invoice_no }}</a>{% elif obj.faan %}<a href="{% url 'faan-detail' obj.faan.pk %}">{{ obj.faan.invoice_no }}</a>{% else %}—{% endif %}</td>
                 </tr>
                 {% endfor %}
               </tbody>

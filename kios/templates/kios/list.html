@@ -1,0 +1,61 @@
+{% extends "main/layout.html" %}
+{% load sinerafil_tags %}
+{% block content %}
+<div class="container-fluid mt-3">
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="card">
+        <div class="card-header">
+          <i class="fa fa-list"> {{legend|upper}}</i>
+        </div>
+        <div class="card-body">
+          <div class="mb-2">
+            <a class="btn btn-primary btn-sm" href="{% url 'kios' %}"><i class="fa fa-cash-register"></i> Kios</a>
+            <a class="btn btn-sm {% if not status %}btn-secondary{% else %}btn-outline-secondary{% endif %}" href="{% url 'faan-list' %}">Hotu</a>
+            <a class="btn btn-sm {% if status == 'remata' %}btn-success{% else %}btn-outline-success{% endif %}" href="?status=remata">Remata</a>
+            <a class="btn btn-sm {% if status == 'anulada' %}btn-danger{% else %}btn-outline-danger{% endif %}" href="?status=anulada">Anulada</a>
+          </div>
+          <div class="table-responsive">
+            <table id="example1" class="table table-sm table-hover" style="width:100%">
+              <thead>
+                <tr>
+                <th data-priority="10000">#</th>
+                <th data-priority="1">Nú. Invoice</th>
+                <th data-priority="4">Data</th>
+                <th data-priority="6">Kliente</th>
+                <th data-priority="5">Sasán</th>
+                <th data-priority="2">Total</th>
+                <th data-priority="7">Osan Selu</th>
+                <th data-priority="8">Troco</th>
+                <th data-priority="3">Status</th>
+                <th data-priority="3">Aksaun</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for obj in objects %}
+                <tr>
+                <td>{{ forloop.counter }}</td>
+                <td class="text-nowrap"><a href="{% url 'faan-detail' obj.pk %}">{{ obj.invoice_no }}</a></td>
+                <td data-order="{{ obj.date|date:'Y-m-d H:i' }}">{{ obj.date|date:'d/m/Y H:i' }}</td>
+                <td>{{ obj.kliente.name|default:'Jerál' }}</td>
+                <td>{{ obj.n_items }}</td>
+                <td data-order="{{ obj.total }}" class="text-nowrap">{{ obj.total|usd }}</td>
+                <td class="text-nowrap">{{ obj.paid|usd }}</td>
+                <td class="text-nowrap">{{ obj.change|usd }}</td>
+                <td>{% if obj.status == 'remata' %}<span class="badge badge-success">Remata</span>{% else %}<span class="badge badge-danger">Anulada</span>{% endif %}</td>
+                <td class="text-nowrap">
+                  <a class="btn btn-sm btn-info" href="{% url 'faan-detail' obj.pk %}" title="Haree"><i class="fa fa-eye"></i></a>
+                  <a class="btn btn-sm btn-primary" href="{% url 'faan-struk' obj.pk %}" target="_blank" title="Struk 80mm"><i class="fa fa-receipt"></i></a>
+                  <a class="btn btn-sm btn-secondary" href="{% url 'faan-pdf' obj.pk %}" target="_blank" title="Invoice PDF"><i class="fa fa-file-pdf"></i></a>
+                </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

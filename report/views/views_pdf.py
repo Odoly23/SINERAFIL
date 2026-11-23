@@ -1,8 +1,10 @@
 from django.contrib.auth.decorators import login_required
+from django.db.models import F
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 
 from config.decorators import allowed_users
+from kios.models import Faan
 from pesa.models import MovimentuStock, Pesa
 from report import pdf
 from report.forms import ReportForm
@@ -47,7 +49,9 @@ def relatoriu(request):
     servisu = (Servisu.objects.filter(status=Servisu.REMATA, date__range=(d1, d2))
                .select_related('kliente', 'motor', 'mekanik').prefetch_related('items').order_by('date', 'id'))
     despeza = Despeza.objects.filter(date__range=(d1, d2)).order_by('date')
-    return pdf_response(pdf.finance_report(servisu, despeza, d1, d2), 'relatoriu-finanseiru.pdf', download)
+    faan = (Faan.objects.filter(status=Faan.REMATA, date__date__range=(d1, d2))
+            .prefetch_related('items').order_by('date'))
+    return pdf_response(pdf.finance_report(servisu, despeza, d1, d2, faan), 'relatoriu-finanseiru.pdf', download)
 
 
 @login_required
@@ -57,3 +61,20 @@ def nota_servisu(request, pk):
     if not can_view_servisu(request.user, s):
         return render(request, 'auth/404.html', status=403)
     return pdf_response(pdf.nota_servisu(s), 'nota-%s.pdf' % s.invoice_no, bool(request.GET.get('download')))
+
+
+@login_required
+@allowed_users(allowed_roles=['admin'])
+def pesa_label(request):
+    """PDF label barcode: hotu pesa ativu (default) ka pesa ida ho `?pk=<id>&n=<kópia>`."""
+    qs = Pesa.objects.filter(is_active=True).order_by('name')
+    copies = 1
+    if request.GET.get('pk'):
+        qs = qs.filter(pk=request.GET['pk'])
+        try:
+            copies = min(max(int(request.GET.get('n', 1)), 1), 90)
+        except ValueError:
+            copies = 1
+    elif request.GET.get('low'):
+        qs = qs.filter(stock__lte=F('stock_min'))
+    return pdf_response(pdf.barcode_labels(list(qs), copies), 'label-barcode.pdf', bool(request.GET.get('download')))

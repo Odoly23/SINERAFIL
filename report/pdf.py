@@ -8,6 +8,7 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4, A5, landscape
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import cm
+from reportlab.graphics.barcode import code128
 from reportlab.platypus import HRFlowable, Image, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
 BLOOD = colors.HexColor('#8b0000')
@@ -128,7 +129,7 @@ def movimentu_report(qs, d1, d2, tipu_label):
     return _render(story)
 
 
-def finance_report(servisu_qs, despeza_qs, d1, d2):
+def finance_report(servisu_qs, despeza_qs, d1, d2, faan_qs=()):
     rows = [['Nota', 'Data', 'Kliente', 'Motór', 'Mekániku', 'Pesa', 'Ongkos', 'Diskaun', 'Total']]
     t_pesa = t_ongkos = t_diskon = t_total = t_lusru = t_mek = Decimal('0')
     for s in servisu_qs:
@@ -142,6 +143,9 @@ def finance_report(servisu_qs, despeza_qs, d1, d2):
         t_mek += s.mech_fee
     rows.append(['', '', '', '', 'TOTÁL', usd(t_pesa), usd(t_ongkos), usd(t_diskon), usd(t_total)])
     t_desp = sum((d.amount for d in despeza_qs), Decimal('0'))
+    faan_qs = list(faan_qs)
+    t_faan = sum((f.total for f in faan_qs), Decimal('0'))
+    t_faan_profit = sum((f.profit for f in faan_qs), Decimal('0'))
     story = _header('Relatóriu Finanseiru Servisu',
                     'Períodu: %s – %s · Servisu ho status <b>Remata</b>' % (
                         d1.strftime('%d/%m/%Y'), d2.strftime('%d/%m/%Y')))
@@ -149,11 +153,14 @@ def finance_report(servisu_qs, despeza_qs, d1, d2):
                         align_right=(5, 6, 7, 8), total_row=True, font=7))
     story.append(Paragraph('Rezumu', S_H))
     summary = [
-        ['Rendimentu total (servisu remata)', usd(t_total)],
+        ['Rendimentu servisu (remata)', usd(t_total)],
+        ['Rendimentu faan kios (%d faan)' % len(faan_qs), usd(t_faan)],
+        ['Rendimentu total', usd(t_total + t_faan)],
         ['Ongkos mekániku (porsentu)', usd(t_mek)],
         ['Lukru servisu (pesa + ongkos bersih - diskaun)', usd(t_lusru)],
+        ['Lukru faan kios', usd(t_faan_profit)],
         ['Despeza ofisina iha períodu', usd(t_desp)],
-        ['Lukru líkidu (lukru servisu - despeza)', usd(t_lusru - t_desp)],
+        ['Lukru líkidu (lukru servisu + kios - despeza)', usd(t_lusru + t_faan_profit - t_desp)],
     ]
     t = Table(summary, colWidths=[11 * cm, 4 * cm])
     t.setStyle(TableStyle([('GRID', (0, 0), (-1, -1), 0.3, GRID), ('FONTSIZE', (0, 0), (-1, -1), 9),
@@ -203,3 +210,84 @@ def nota_servisu(s):
                             ('LINEABOVE', (0, -1), (-1, -1), 0.8, MAROON)]))
     story += [tt, Spacer(1, 18), Paragraph('Obrigadu ba konfiansa ba ita-nia ofisina.', S_SUB)]
     return _render(story, pagesize=A5, margins=1.2 * cm)
+
+
+def faan_invoice(f):
+    """Invoice pagamentu faan kios (A5): sasán, total, osan selu no troco (USD)."""
+    story = _header('Invoice %s' % f.invoice_no)
+    info = [
+        ['Data', timezone.localtime(f.date).strftime('%d/%m/%Y %H:%M'), 'Status', f.get_status_display()],
+        ['Kliente', f.kliente.name if f.kliente else 'Kliente jerál', 'Kasir',
+         (f.created_by.get_full_name() or f.created_by.username) if f.created_by else '—'],
+    ]
+    t = Table(info, colWidths=[2 * cm, 4.8 * cm, 2 * cm, 3.2 * cm])
+    t.setStyle(TableStyle([('FONTSIZE', (0, 0), (-1, -1), 8.5),
+                           ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+                           ('FONTNAME', (2, 0), (2, -1), 'Helvetica-Bold'),
+                           ('BOTTOMPADDING', (0, 0), (-1, -1), 2), ('TOPPADDING', (0, 0), (-1, -1), 2)]))
+    story += [t, Spacer(1, 6)]
+    rows = [['Nu', 'Sasán', 'Kuant.', 'Folin', 'Subtotal']]
+    for i, it in enumerate(f.items.select_related('pesa'), 1):
+        rows.append([i, Paragraph(it.pesa.name, S_CELL), it.quantity, usd(it.price_sell), usd(it.subtotal)])
+    story.append(_table(rows, [0.8 * cm, 6.2 * cm, 1.3 * cm, 2 * cm, 2.2 * cm], align_right=(2, 3, 4)))
+    story.append(Spacer(1, 6))
+    tot = [['Subtotal', usd(f.subtotal)]]
+    if f.discount:
+        tot.append(['Diskaun', '- ' + usd(f.discount)])
+    tot += [['TOTÁL', usd(f.total)], ['Osan selu (cash)', usd(f.paid)], ['Osan fila (troco)', usd(f.change)]]
+    total_idx = 2 if f.discount else 1
+    tt = Table(tot, colWidths=[4.5 * cm, 3.2 * cm], hAlign='RIGHT')
+    tt.setStyle(TableStyle([('ALIGN', (1, 0), (1, -1), 'RIGHT'), ('FONTSIZE', (0, 0), (-1, -1), 9),
+                            ('FONTNAME', (0, total_idx), (-1, total_idx), 'Helvetica-Bold'),
+                            ('LINEABOVE', (0, total_idx), (-1, total_idx), 0.8, MAROON),
+                            ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold')]))
+    story += [tt, Spacer(1, 14)]
+    if f.status == 'anulada':
+        story.append(Paragraph('<font color="#8b0000"><b>FAAN ANULA ONA</b></font>', S_SUB))
+    story.append(Paragraph('Obrigadu ba ita-nia konfiansa.', S_SUB))
+    return _render(story, pagesize=A5, margins=1.2 * cm)
+
+
+def barcode_labels(pesa_list, copies=1):
+    """Label barcode Code128 (3 kolum A4): kódigu/barcode, naran no folin faan."""
+    from reportlab.pdfgen import canvas
+    buf = BytesIO()
+    c = canvas.Canvas(buf, pagesize=A4)
+    W, H = A4
+    cols, rows = 3, 9
+    lw, lh = (W - 2 * cm) / cols, (H - 2 * cm) / rows
+    items = [p for p in pesa_list for _ in range(max(1, copies))]
+    for i, p in enumerate(items):
+        pos = i % (cols * rows)
+        if i and pos == 0:
+            c.showPage()
+        x = 1 * cm + (pos % cols) * lw
+        y = H - 1 * cm - (pos // cols + 1) * lh
+        c.setStrokeColor(GRID)
+        c.setLineWidth(0.3)
+        c.rect(x + 2, y + 2, lw - 4, lh - 4)
+        value = p.barcode or p.code
+        bc = code128.Code128(value, barHeight=0.85 * cm, barWidth=0.35 * mm_unit())
+        bw = bc.width
+        scale = min(1.0, (lw - 14) / bw)
+        c.saveState()
+        c.setFillColor(colors.black)   # batang barcode wajib hitam pekat agar terbaca scanner
+        c.translate(x + (lw - bw * scale) / 2, y + 0.55 * cm)
+        c.scale(scale, 1)
+        bc.drawOn(c, 0, 0)
+        c.restoreState()
+        c.setFillColor(colors.black)
+        c.setFont('Helvetica-Bold', 7.5)
+        c.drawCentredString(x + lw / 2, y + 0.22 * cm, value)
+        c.setFont('Helvetica', 6.5)
+        c.drawString(x + 6, y + lh - 0.42 * cm, p.name[:34])
+        c.setFont('Helvetica-Bold', 8)
+        c.setFillColor(BLOOD)
+        c.drawRightString(x + lw - 6, y + lh - 0.85 * cm, usd(p.price_sell))
+    c.save()
+    return buf.getvalue()
+
+
+def mm_unit():
+    from reportlab.lib.units import mm
+    return mm

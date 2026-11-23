@@ -8,6 +8,7 @@ from django.utils import timezone
 from config.auth_utils import get_emp, get_group
 from config.decorators import allowed_users
 from config.utils import first_day_of_month, month_start
+from kios.models import Faan
 from pesa.models import Pesa
 from servisu.models import Despeza, Servisu, ServisuPesa
 
@@ -37,6 +38,10 @@ def dashboard(request):
             for s in done:
                 rev += s.total
                 lusru += s.profit
+            for f in Faan.objects.filter(status=Faan.REMATA, date__date__gte=start, date__date__lt=end) \
+                    .prefetch_related('items'):
+                rev += f.total
+                lusru += f.profit
             desp = Despeza.objects.filter(date__gte=start, date__lt=end).aggregate(t=Sum('amount'))['t'] or 0
             months.append(start.strftime('%m/%Y'))
             revenue.append(float(rev))

@@ -10,7 +10,8 @@
         </div>
         <div class="card-body">
           <div class="mb-2">
-            {% if group == "admin" %}<a class="btn btn-primary btn-sm" href="{% url 'pesa-add' %}"><i class="fa fa-plus"></i> Aumenta</a>{% endif %}
+            {% if group == "admin" %}<a class="btn btn-primary btn-sm" href="{% url 'pesa-add' %}"><i class="fa fa-plus"></i> Aumenta</a>
+            <a class="btn btn-sm btn-outline-dark" href="{% url 'pesa-label' %}" target="_blank" title="PDF label barcode ba pesa hotu"><i class="fa fa-barcode"></i> Print Label</a>{% endif %}
             {% if low %}
               <a class="btn btn-sm btn-outline-secondary" href="{% url 'pesa-list' %}">Haree hotu</a>
               <span class="badge badge-warning">Stock mínimu de'it</span>
@@ -24,6 +25,7 @@
                 <tr>
                 <th data-priority="10000">#</th>
                 <th data-priority="6">Kódigu</th>
+                <th data-priority="9">Barcode</th>
                 <th data-priority="1">Naran Pesa</th>
                 <th data-priority="7">Kategoria</th>
                 <th data-priority="8">Folin Sosa</th>
@@ -38,6 +40,7 @@
                 <tr {% if obj.is_low %}class="row-low"{% endif %}>
                 <td>{{ forloop.counter }}</td>
                 <td>{{ obj.code }}</td>
+                <td>{{ obj.barcode|default:'—' }}</td>
                 <td><a href="{% url 'pesa-detail' obj.pk %}">{{ obj.name }}</a></td>
                 <td>{{ obj.kategoria|default:'—' }}</td>
                 <td data-order="{{ obj.price_buy }}">{{ obj.price_buy|usd }}</td>

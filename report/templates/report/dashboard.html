@@ -7,7 +7,7 @@
     <div class="col-sm-6 col-xl-3 mb-3"><div class="stat-card stat-2"><div class="small">Stock mínimu</div><div class="num">{{ n_stock_low }}</div><i class="fa fa-exclamation-triangle"></i></div></div>
     <div class="col-sm-6 col-xl-3 mb-3"><div class="stat-card stat-3"><div class="small">Servisu fulan ne'e</div><div class="num">{{ n_servisu_fulan }}</div><i class="fa fa-wrench"></i></div></div>
     {% if show_finance %}
-    <div class="col-sm-6 col-xl-3 mb-3"><div class="stat-card stat-4"><div class="small">Rendimentu fulan ne'e</div><div class="num">{{ revenue_month|usd }}</div><i class="fa fa-dollar-sign"></i></div></div>
+    <div class="col-sm-6 col-xl-3 mb-3"><div class="stat-card stat-4"><div class="small">Rendimentu fulan ne'e <span class="small">(servisu + kios)</span></div><div class="num">{{ revenue_month|usd }}</div><i class="fa fa-dollar-sign"></i></div></div>
     {% else %}
     <div class="col-sm-6 col-xl-3 mb-3"><div class="stat-card stat-4"><div class="small">Servisu seidauk remata</div><div class="num">{{ n_servisu_pendente }}</div><i class="fa fa-hourglass-half"></i></div></div>
     {% endif %}

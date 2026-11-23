@@ -10,6 +10,7 @@ from django.utils import timezone
 from cliente.models import Kliente, Motor
 from pesa.models import MovimentuStock, Pesa
 from pesa.utils import register_movement
+from kios.utils import create_sale
 from servisu.models import Despeza, Servisu, ServisuPesa
 from users.models import Emp
 from users.utils import save_emp_account
@@ -47,6 +48,11 @@ class Command(BaseCommand):
                 user.is_superuser = user.is_staff = True
                 user.save()
 
+        # barcode demo (EAN-13 style) ba pesa 30 primeiru, atu bele teste scanner
+        for i, p in enumerate(Pesa.objects.filter(barcode__isnull=True).order_by('id')[:30], 1):
+            p.barcode = '899%010d' % i
+            p.save(update_fields=['barcode'])
+
         if Servisu.objects.exists():
             self.stdout.write('Dadus servisu iha ona — la kria fali.')
             return
@@ -81,5 +87,15 @@ class Command(BaseCommand):
             low = pesa[0]
             low.refresh_from_db()
             register_movement(low, MovimentuStock.SAI, low.stock - 1, user=admin, note='Demo alerta stock')
+        # faan kios demo
+        import json
+        stock_ok = list(Pesa.objects.filter(stock__gte=3, price_sell__lte=30)[:12])
+        for _ in range(6):
+            chosen = rnd.sample(stock_ok, k=2)
+            cart = json.dumps([{'pesa': p.pk, 'qty': rnd.randint(1, 2)} for p in chosen])
+            total = sum(p.price_sell * q['qty'] for p, q in zip(chosen, json.loads(cart)))
+            f = create_sale(admin, cart, '0', str(int(total) + 5), note='Demo')
+            f.date = timezone.now() - timedelta(days=rnd.randint(0, 40))
+            f.save()
         self.stdout.write(self.style.SUCCESS(
             'Dadus demo kria ona. Login: admin / zin / anata / abosa / nain — password: %s' % PASSWORD))

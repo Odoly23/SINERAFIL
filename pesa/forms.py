@@ -16,7 +16,7 @@ class DateInput(forms.DateInput):
 class PesaForm(forms.ModelForm):
     class Meta:
         model = Pesa
-        fields = ['code', 'name', 'kategoria', 'unit', 'price_buy', 'price_sell', 'stock_min',
+        fields = ['code', 'barcode', 'name', 'kategoria', 'unit', 'price_buy', 'price_sell', 'stock_min',
                   'description', 'is_active']
         widgets = {'description': forms.Textarea(attrs={'rows': 2})}
 
@@ -26,18 +26,25 @@ class PesaForm(forms.ModelForm):
         self.helper = make_helper(
             Row(
                 Column('code', css_class='form-group col-md-3 mb-2'),
+                Column('barcode', css_class='form-group col-md-3 mb-2'),
                 Column('name', css_class='form-group col-md-6 mb-2'),
-                Column('kategoria', css_class='form-group col-md-3 mb-2'),
             ),
             Row(
+                Column('kategoria', css_class='form-group col-md-4 mb-2'),
                 Column('unit', css_class='form-group col-md-2 mb-2'),
                 Column('price_buy', css_class='form-group col-md-3 mb-2'),
                 Column('price_sell', css_class='form-group col-md-3 mb-2'),
-                Column('stock_min', css_class='form-group col-md-2 mb-2'),
-                Column('is_active', css_class='form-group col-md-2 mb-2 pt-4'),
+            ),
+            Row(
+                Column('stock_min', css_class='form-group col-md-3 mb-2'),
+                Column('is_active', css_class='form-group col-md-3 mb-2 pt-4'),
             ),
             Row(Column('description', css_class='form-group col-md-12 mb-2')),
         )
+
+
+    def clean_barcode(self):
+        return (self.cleaned_data.get('barcode') or '').strip() or None
 
 
 class MovimentuForm(forms.ModelForm):

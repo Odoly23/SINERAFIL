@@ -22,6 +22,7 @@ users/              # Funcionariu (Emp), konta (EmpUser), AuditLogin, jestaun ut
 pesa/               # Pesa-rezerva, movimentu stock (tama/sai), import_excel
 cliente/            # Kliente no Motór
 servisu/            # Servisu reparasaun, pesa ne'ebé uza, despeza
+kios/               # Kios: faan sasán (POS), scanner barcode, struk 80mm, invoice PDF
 report/             # Dashboard (grafiku) no relatóriu PDF
 data/               # File Excel orijinál (NOTA DAVID)
 manage.py
@@ -47,7 +48,7 @@ Loke http://127.0.0.1:8000/ . Password hotu-hotu iha demo: `nerafil123`
 
 | Username | Grupu | Direitu asesu |
 |---|---|---|
-| `admin` | admin | Hotu: pesa, stock tama/sai, kliente, motór, servisu, despeza, relatóriu, utilizadór |
+| `admin` | admin | Hotu: pesa, stock tama/sai, **kios (faan sasán)**, kliente, motór, servisu, despeza, relatóriu, utilizadór |
 | `zin`, `anata`, `abosa` | mekaniku | Haree pesa; kria/edita servisu *rasik nian* ne'ebé seidauk remata no uza pesa; kliente & motór |
 | `nain` | nain | Haree de'it (read-only): dashboard finanseiru, stock, servisu, despeza no relatóriu PDF |
 
@@ -62,6 +63,19 @@ Atu kria konta admin rasik: `python manage.py createsuperuser` (superuser sempre
   automátiku (hasai pesa ka hamoos servisu → stock fila fali).
 - **Dashboard** ho grafiku (rendimentu/lukru 6 fulan, status servisu, pesa uza barak liu).
 - **PDF** (ReportLab): relatóriu stock, tama/sai, finanseiru no nota servisu.
+- **Kios (faan sasán / POS)** — admin de'it: scan barcode ho scanner USB (Qoltec, mode keyboard: kódigu + Enter),
+  ka buka tuir naran; karrinhu, diskaun, **osan selu (cash USD) no osan fila (troco)** ho butaun lalais
+  (Osan Pas, $1…$100); stock redús automátiku; **struk 80mm** (printer thermal) no **invoice PDF A5**;
+  istória faan no anulasaun (stock fila fali); faan tama iha relatóriu finanseiru no dashboard.
+- **Barcode pesa**: kolun `barcode` (opsionál) iha form pesa; scanner bele uza kódigu pesa (`PSA-0001`) mós.
+  **Print Label** (PDF Code128, A4 3 kolun) ba pesa hotu ka pesa ida (`Label ×12`) hodi kole iha sasán.
+
+## 🛒 Kios — nota ba scanner
+
+Scanner USB (ex. Qoltec) funsiona hanesan keyboard: koko loke `Kios`, klik kampu *Scan* (otomátiku fokus), no scan
+barcode — sasán tama iha karrinhu ho bip. Konfigurasaun scanner: suffix **Enter** (default). Demo: `seed_demo`
+fó barcode `8990000000001`… ba pesa 30 primeiru. Print struk: browser *Print* → printer thermal 80mm
+(troka "Margins: None" no "Headers and footers" off iha dialog print).
 
 ## 🧮 Kálkulu servisu
 

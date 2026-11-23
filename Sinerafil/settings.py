@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'pesa',
     'cliente',
     'servisu',
+    'kios',
     'report',
 ]
 
