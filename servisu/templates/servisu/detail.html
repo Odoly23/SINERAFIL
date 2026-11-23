@@ -37,10 +37,10 @@
         <div class="card-header"><i class="fa fa-cogs"></i> PESA NE'EBÉ UZA</div>
         <div class="table-responsive">
           <table class="table table-sm mb-0">
-            <thead><tr><th>Pesa</th><th class="text-right">Kuant.</th><th class="text-right">Folin</th><th class="text-right">Subtotal</th>{% if can_edit %}<th></th>{% endif %}</tr></thead>
+            <thead><tr><th>Pesa</th><th class="text-right text-nowrap">Kuant.</th><th class="text-right text-nowrap">Folin</th><th class="text-right text-nowrap">Subtotal</th>{% if can_edit %}<th></th>{% endif %}</tr></thead>
             <tbody>
             {% for it in obj.items.all %}
-              <tr><td>{{ it.pesa.name }}</td><td class="text-right">{{ it.quantity }}</td><td class="text-right">{{ it.price_sell|usd }}</td><td class="text-right">{{ it.subtotal|usd }}</td>
+              <tr><td>{{ it.pesa.name }}</td><td class="text-right text-nowrap">{{ it.quantity }}</td><td class="text-right text-nowrap">{{ it.price_sell|usd }}</td><td class="text-right text-nowrap">{{ it.subtotal|usd }}</td>
                 {% if can_edit %}<td class="text-right"><form method="post" action="{% url 'servisu-pesa-remove' obj.pk it.pk %}" onsubmit="return confirm('Hasai pesa ne\'e no fila stock?')">{% csrf_token %}<button class="btn btn-sm btn-outline-danger"><i class="fa fa-times"></i></button></form></td>{% endif %}</tr>
             {% empty %}<tr><td colspan="5" class="text-center text-muted py-3">Seidauk uza pesa.</td></tr>{% endfor %}
             </tbody>
