@@ -20,22 +20,22 @@
             <table id="example1" class="table table-sm table-hover" style="width:100%">
               <thead>
                 <tr>
-                <th>#</th>
-                <th>Nú. Nota</th>
-                <th>Data</th>
-                <th>Kliente</th>
-                <th>Motór</th>
-                <th>Mekániku</th>
-                <th>Status</th>
-                <th>Total</th>
-                <th>Aksaun</th>
+                <th data-priority="10000">#</th>
+                <th data-priority="1">Nú. Nota</th>
+                <th data-priority="5">Data</th>
+                <th data-priority="4">Kliente</th>
+                <th data-priority="6">Motór</th>
+                <th data-priority="7">Mekániku</th>
+                <th data-priority="2">Status</th>
+                <th data-priority="2">Total</th>
+                <th data-priority="3">Aksaun</th>
                 </tr>
               </thead>
               <tbody>
                 {% for obj in objects %}
                 <tr>
                 <td>{{ forloop.counter }}</td>
-                <td>{{ obj.invoice_no }}</td>
+                <td class="text-nowrap"><a href="{% url 'servisu-detail' obj.pk %}">{{ obj.invoice_no }}</a></td>
                 <td data-order="{{ obj.date|date:'Y-m-d' }}">{{ obj.date|date:'d/m/Y' }}</td>
                 <td>{{ obj.kliente.name }}</td>
                 <td>{{ obj.motor.plate }}</td>

@@ -46,6 +46,10 @@ a:hover { color: var(--blood); }
 .stat-2 { background: linear-gradient(135deg, #5c0a14, #9d1b2c); }
 .stat-3 { background: linear-gradient(135deg, #7a1021, #b8323f); }
 .stat-4 { background: linear-gradient(135deg, #3d060e, #7a1021); }
+.chart-box { position: relative; height: 280px; }
+.chart-box-sm { height: 240px; }
+.dash-recent td:first-child, .dash-recent td:last-child { white-space: nowrap; }
+@media (max-width: 575.98px) { .chart-box { height: 230px; } .dash-recent { font-size: .8rem; } }
 .footer { text-align: center; color: #8a7375; font-size: .8rem; padding: 1rem; }
 .dataTables_wrapper .page-item.active .page-link { background: var(--blood); border-color: var(--blood); }
 

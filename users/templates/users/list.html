@@ -15,21 +15,21 @@
             <table id="example1" class="table table-sm table-hover" style="width:100%">
               <thead>
                 <tr>
-                <th>#</th>
-                <th>Naran</th>
-                <th>Username</th>
-                <th>Papél</th>
-                <th>Persen Ongkos</th>
-                <th>Ativu</th>
-                <th>Reset</th>
-                <th>Aksaun</th>
+                <th data-priority="10000">#</th>
+                <th data-priority="1">Naran</th>
+                <th data-priority="2">Username</th>
+                <th data-priority="3">Papél</th>
+                <th data-priority="5">Persen Ongkos</th>
+                <th data-priority="4">Ativu</th>
+                <th data-priority="6">Reset</th>
+                <th data-priority="3">Aksaun</th>
                 </tr>
               </thead>
               <tbody>
                 {% for obj in objects %}
                 <tr>
                 <td>{{ forloop.counter }}</td>
-                <td>{{ obj.emp.name }}</td>
+                <td><a href="{% url 'emp-detail' obj.emp.pk %}">{{ obj.emp.name }}</a></td>
                 <td>{{ obj.user.username }}</td>
                 <td>{{ obj.user.groups.first.name|upper }}</td>
                 <td>{{ obj.emp.persen_ongkos }}%</td>

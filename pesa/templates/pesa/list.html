@@ -22,15 +22,15 @@
             <table id="example1" class="table table-sm table-hover" style="width:100%">
               <thead>
                 <tr>
-                <th>#</th>
-                <th>Kódigu</th>
-                <th>Naran Pesa</th>
-                <th>Kategoria</th>
-                <th>Folin Sosa</th>
-                <th>Folin Faan</th>
-                <th>Stock</th>
-                <th>Mínimu</th>
-                <th>Aksaun</th>
+                <th data-priority="10000">#</th>
+                <th data-priority="6">Kódigu</th>
+                <th data-priority="1">Naran Pesa</th>
+                <th data-priority="7">Kategoria</th>
+                <th data-priority="8">Folin Sosa</th>
+                <th data-priority="4">Folin Faan</th>
+                <th data-priority="2">Stock</th>
+                <th data-priority="9">Mínimu</th>
+                <th data-priority="3">Aksaun</th>
                 </tr>
               </thead>
               <tbody>
@@ -38,7 +38,7 @@
                 <tr {% if obj.is_low %}class="row-low"{% endif %}>
                 <td>{{ forloop.counter }}</td>
                 <td>{{ obj.code }}</td>
-                <td>{{ obj.name }}</td>
+                <td><a href="{% url 'pesa-detail' obj.pk %}">{{ obj.name }}</a></td>
                 <td>{{ obj.kategoria|default:'—' }}</td>
                 <td data-order="{{ obj.price_buy }}">{{ obj.price_buy|usd }}</td>
                 <td data-order="{{ obj.price_sell }}">{{ obj.price_sell|usd }}</td>

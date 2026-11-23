@@ -21,20 +21,20 @@
   <div class="row">
     {% if show_finance %}
     <div class="col-lg-8 mb-3"><div class="card"><div class="card-header">RENDIMENTU NO LUKRU (6 FULAN IKUS) <small class="text-muted">· Valór stock: {{ stock_value|usd }}</small></div>
-      <div class="card-body"><canvas id="chMonthly" height="110"></canvas></div></div></div>
+      <div class="card-body"><div class="chart-box"><canvas id="chMonthly"></canvas></div></div></div></div>
     {% else %}
-    <div class="col-lg-8 mb-3"><div class="card"><div class="card-header">PESA UZA BARAK LIU</div><div class="card-body"><canvas id="chTop" height="110"></canvas></div></div></div>
+    <div class="col-lg-8 mb-3"><div class="card"><div class="card-header">PESA UZA BARAK LIU</div><div class="card-body"><div class="chart-box"><canvas id="chTop"></canvas></div></div></div></div>
     {% endif %}
     <div class="col-lg-4 mb-3"><div class="card"><div class="card-header">STATUS SERVISU</div>
-      <div class="card-body"><canvas id="chStatus" height="200"></canvas></div></div></div>
+      <div class="card-body"><div class="chart-box chart-box-sm"><canvas id="chStatus"></canvas></div></div></div></div>
   </div>
 
   <div class="row">
     <div class="col-lg-7 mb-3"><div class="card"><div class="card-header">SERVISU FOUN</div>
-      <div class="table-responsive"><table class="table table-sm mb-0">
-        <thead><tr><th>Nota</th><th>Kliente</th><th>Motór</th><th>Status</th><th class="text-right">Total</th></tr></thead>
+      <div class="table-responsive"><table class="table table-sm mb-0 dash-recent">
+        <thead><tr><th>Nota</th><th>Kliente</th><th class="d-none d-sm-table-cell">Motór</th><th>Status</th><th class="text-right">Total</th></tr></thead>
         <tbody>{% for s in recent %}
-          <tr><td><a href="{% url 'servisu-detail' s.pk %}">{{ s.invoice_no }}</a></td><td>{{ s.kliente.name }}</td><td>{{ s.motor.plate }}</td><td>{{ s.status|status_badge }}</td><td class="text-right">{{ s.total|usd }}</td></tr>
+          <tr><td><a href="{% url 'servisu-detail' s.pk %}">{{ s.invoice_no }}</a></td><td>{{ s.kliente.name }}</td><td class="d-none d-sm-table-cell">{{ s.motor.plate }}</td><td>{{ s.status|status_badge }}</td><td class="text-right">{{ s.total|usd }}</td></tr>
         {% empty %}<tr><td colspan="5" class="text-center text-muted py-3">Seidauk iha servisu.</td></tr>{% endfor %}</tbody></table></div></div></div>
     <div class="col-lg-5 mb-3"><div class="card"><div class="card-header">PESA HO STOCK MÍNIMU</div>
       <ul class="list-group list-group-flush">
@@ -55,14 +55,14 @@
     new Chart(document.getElementById('chMonthly'), { type:'bar', data:{ labels:d.months, datasets:[
       {label:'Rendimentu (USD)', data:d.revenue, backgroundColor:red},
       {label:'Lukru líkidu (USD)', data:d.profit, type:'line', borderColor:maroon, backgroundColor:'rgba(92,10,20,.1)', fill:false, lineTension:.25}
-    ]}, options:{ scales:{ yAxes:[{ticks:{beginAtZero:true}}] } } });
+    ]}, options:{ maintainAspectRatio:false, scales:{ yAxes:[{ticks:{beginAtZero:true}}] } } });
   }
   if (document.getElementById('chTop')) {
     new Chart(document.getElementById('chTop'), { type:'horizontalBar', data:{ labels:d.top_labels, datasets:[{label:'Kuantidade uza', data:d.top_values, backgroundColor:red}] },
-      options:{ scales:{ xAxes:[{ticks:{beginAtZero:true, precision:0}}] } } });
+      options:{ maintainAspectRatio:false, scales:{ xAxes:[{ticks:{beginAtZero:true, precision:0}}] } } });
   }
   new Chart(document.getElementById('chStatus'), { type:'doughnut', data:{ labels:d.status_labels, datasets:[{ data:d.status_values, backgroundColor:[pink, red, maroon] }] },
-    options:{ legend:{position:'bottom'} } });
+    options:{ maintainAspectRatio:false, legend:{position:'bottom'} } });
 })();
 </script>
 {% endblock %}
