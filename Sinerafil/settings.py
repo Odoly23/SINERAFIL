@@ -17,7 +17,6 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='127.0.0.1,localhost', cast=Csv())
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -31,10 +30,9 @@ INSTALLED_APPS = [
     'custom',
     'main',
     'users',
-    'pesa',
-    'cliente',
-    'servisu',
-    'kios',
+    'inventory',
+    'customers',
+    'repairs',
     'report',
 ]
 
@@ -111,11 +109,12 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 # ══════════════════════════════════════════════════════════════
 #  AUTH & LOGIN
 # ══════════════════════════════════════════════════════════════
-LOGIN_REDIRECT_URL = 'home'
+AUTH_USER_MODEL = 'users.User'      # tabel USER (ERD): id, username, password, role
+LOGIN_REDIRECT_URL = 'dashboard'
 LOGIN_URL = 'login'
 
 # ══════════════════════════════════════════════════════════════
-#  IDENTIDADE OFISINA (kop relatóriu PDF no nota)
+#  IDENTIDADE OFISINA (kop relatóriu PDF no invoice)
 # ══════════════════════════════════════════════════════════════
 SHOP_NAME = config('SHOP_NAME', default='Ofisina Nerafil')
 SHOP_TAGLINE = config('SHOP_TAGLINE', default='Reparasaun & Manutensaun Motór')

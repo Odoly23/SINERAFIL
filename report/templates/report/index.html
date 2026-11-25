@@ -7,12 +7,12 @@
       <form method="get" target="_blank" novalidate>
         {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
         <div class="form-row">
-          <div class="form-group col-12"><label>{{ form.tipu.label }}</label>{{ form.tipu }}</div>
-          <div class="form-group col-md-6"><label>{{ form.date_from.label }}</label>{{ form.date_from }}</div>
-          <div class="form-group col-md-6"><label>{{ form.date_to.label }}</label>{{ form.date_to }}</div>
-          <div class="form-group col-12" id="mov-box"><label>{{ form.movimentu.label }}</label>{{ form.movimentu }}</div>
+          <div class="form-group col-12"><label>{{ form.type.label }}</label>{{ form.type }}</div>
+          <div class="form-group col-md-6" id="from-box"><label>{{ form.date_from.label }}</label>{{ form.date_from }}</div>
+          <div class="form-group col-md-6" id="to-box"><label>{{ form.date_to.label }}</label>{{ form.date_to }}</div>
+          <div class="form-group col-12" id="mov-box"><label>{{ form.movement.label }}</label>{{ form.movement }}</div>
         </div>
-        <p class="small text-muted">Relatóriu stock uza stock atuál (la presiza períodu). Relatóriu finanseiru uza de'it servisu ho status <b>Remata</b>.</p>
+        <p class="small text-muted">Relatóriu stock uza stock atuál (la presiza períodu). Relatóriu reparasaun uza de'it reparasaun ho status <b>Remata</b>.</p>
         <button class="btn btn-blood"><i class="fa fa-file-pdf"></i> Hamosu PDF</button>
         <button class="btn btn-outline-secondary" name="download" value="1"><i class="fa fa-download"></i> Download</button>
       </form>
@@ -22,7 +22,11 @@
 {% endblock %}
 {% block scripts %}
 <script>
-  function sync(){ $('#mov-box').toggle($('#id_tipu').val()==='movimentu'); }
-  $('#id_tipu').on('change', sync); sync();
+  function sync(){
+    var t = $('#id_type').val();
+    $('#mov-box').toggle(t === 'movement');
+    $('#from-box, #to-box').toggle(t !== 'stock');
+  }
+  $('#id_type').on('change', sync); sync();
 </script>
 {% endblock %}

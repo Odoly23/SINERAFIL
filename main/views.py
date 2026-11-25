@@ -1,29 +1,15 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
-from django.utils import timezone
 
-from config.auth_utils import get_group
-from users.models import AuditLogin
+from config.activity import log_activity
 
 
 # ══════════════════════════════════════════════════════════════
-#  HELPER
+#  ABOUT (pájina públiku)
 # ══════════════════════════════════════════════════════════════
 
-def _get_client_ip(request):
-    x_forwarded = request.META.get('HTTP_X_FORWARDED_FOR')
-    if x_forwarded:
-        return x_forwarded.split(',')[0].strip()
-    return request.META.get('REMOTE_ADDR')
-
-
-# ══════════════════════════════════════════════════════════════
-#  LANDING (pájina públiku)
-# ══════════════════════════════════════════════════════════════
-
-def landing(request):
+def about(request):
     return render(request, 'home/landing.html', {'title': 'Ofisina Nerafil'})
 
 
@@ -32,8 +18,9 @@ def landing(request):
 # ══════════════════════════════════════════════════════════════
 
 def loginPage(request):
+    """Start -> System Login -> User Validation (valid: Dashboard; invalid: fila ba login)."""
     if request.user.is_authenticated:
-        return redirect('home')
+        return redirect('dashboard')
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
         password = request.POST.get('password', '')
@@ -42,20 +29,12 @@ def loginPage(request):
             return render(request, 'auth/login.html', {'title': 'Pajina Login'})
         user = authenticate(request, username=username, password=password)
         if user is not None:
-            if not user.is_active:
-                messages.error(request, "Konta ne'e desativadu. Kontaktu administrador.")
-                return render(request, 'auth/login.html', {'title': 'Pajina Login'})
             login(request, user)
-            AuditLogin.objects.create(
-                user=user,
-                ip_address=_get_client_ip(request),
-                user_agent=request.META.get('HTTP_USER_AGENT', ''),
-                user_type=get_group(user),
-                is_active=True,
-            )
-            messages.success(request, f'Bem-vindo, {user.get_full_name() or user.username}!')
-            return redirect(request.GET.get('next') or 'home')
-        messages.error(request, 'Username ka password salah. Favor koko fila fali.')
+            log_activity(user, 'Login')
+            messages.success(request, f'Bem-vindo, {user.display_name}!')
+            nxt = request.GET.get('next') or request.POST.get('next')
+            return redirect(nxt if nxt and nxt.startswith('/') else 'dashboard')
+        messages.error(request, "Username ka password salah, ka konta la ativu. Favor koko fila fali.")
     return render(request, 'auth/login.html', {'title': 'Pajina Login'})
 
 
@@ -65,26 +44,9 @@ def loginPage(request):
 
 def logout_view(request):
     if request.user.is_authenticated:
-        audit = AuditLogin.objects.filter(user=request.user, is_active=True).order_by('-login_time').first()
-        if audit:
-            audit.logout_time = timezone.now()
-            audit.save()
+        log_activity(request.user, 'Logout')
         logout(request)
     return redirect('login')
-
-
-# ══════════════════════════════════════════════════════════════
-#  HOME — pájina sambutan semua user
-# ══════════════════════════════════════════════════════════════
-
-@login_required
-def home(request):
-    context = {
-        'title': 'Sistema Jestaun Inventáriu',
-        'legend': 'Bem-vindo',
-        'homeactive': 'active',
-    }
-    return render(request, 'home/home.html', context)
 
 
 # ══════════════════════════════════════════════════════════════

@@ -2,17 +2,17 @@
 <div class="side-navbar-wrapper">
   <!-- Sidebar Header -->
   <div class="sidenav-header">
-    <a href="{% url 'home' %}"><img src="{% static 'Image/logo.png' %}" alt="{{ SHOP_NAME }}"></a>
-    <span class="menu-text">{{ SHOP_NAME }} · {{ group|upper }}</span>
+    <a href="{% url 'dashboard' %}"><img src="{% static 'Image/logo.png' %}" alt="{{ SHOP_NAME }}"></a>
+    <span class="menu-text">{{ SHOP_NAME }} · {{ role_label }}</span>
   </div>
   <!-- Sidebar Navigation Menus -->
   {% if user.is_authenticated %}
-    {% if group == 'admin' %}
+    {% if role == 'admin' %}
       {% include 'main/sidenavs/admin.html' %}
-    {% elif group == 'mekaniku' %}
-      {% include 'main/sidenavs/mekaniku.html' %}
-    {% elif group == 'nain' %}
-      {% include 'main/sidenavs/nain.html' %}
+    {% elif role == 'technician' %}
+      {% include 'main/sidenavs/technician.html' %}
+    {% elif role == 'owner' %}
+      {% include 'main/sidenavs/owner.html' %}
     {% endif %}
     <h5 class="sidenav-heading">Konta</h5>
     <ul class="side-menu list-unstyled">

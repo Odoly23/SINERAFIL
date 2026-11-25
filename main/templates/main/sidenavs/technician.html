@@ -1,0 +1,8 @@
+<h5 class="sidenav-heading">Menu Prinsipál</h5>
+<ul class="side-menu list-unstyled">
+  <li><a href="{% url 'dashboard' %}" class="{% if request.path == '/Reports/dashboard/' %}active{% endif %}"><i class="fa fa-tachometer-alt"></i><span class="menu-text"> Dashboard</span></a></li>
+  <li><a href="{% url 'repair-list' %}" class="{% if '/Repairs/' in request.path %}active{% endif %}"><i class="fa fa-wrench"></i><span class="menu-text"> Reparasaun Hau-nian</span></a></li>
+  <li><a href="{% url 'part-list' %}" class="{% if '/Inventory/' in request.path %}active{% endif %}"><i class="fa fa-cogs"></i><span class="menu-text"> Spare Parts</span>{% if alert_stock %}<span class="badge badge-warning menu-badge">{{ alert_stock }}</span>{% endif %}</a></li>
+  <li><a href="{% url 'customer-list' %}" class="{% if '/Customers/' in request.path and 'equipment' not in request.path %}active{% endif %}"><i class="fa fa-users"></i><span class="menu-text"> Customer Data</span></a></li>
+  <li><a href="{% url 'equipment-list' %}" class="{% if '/Customers/equipment' in request.path %}active{% endif %}"><i class="fa fa-motorcycle"></i><span class="menu-text"> Equipment Data</span></a></li>
+</ul>

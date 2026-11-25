@@ -1,11 +1,11 @@
 from django.conf import settings
 from django.db.models import F
 
-from config.auth_utils import get_group
+from config.auth_utils import get_role
 
 
 def sinerafil(request):
-    """Variabel global ba template: identidade ofisina, grupu (papél) no alerta stock."""
+    """Variabel global ba template: identidade ofisina, papél (role) no alerta stock."""
     ctx = {
         'SHOP_NAME': settings.SHOP_NAME,
         'SHOP_TAGLINE': settings.SHOP_TAGLINE,
@@ -14,7 +14,8 @@ def sinerafil(request):
     }
     user = request.user
     if user.is_authenticated:
-        from pesa.models import Pesa
-        ctx['group'] = get_group(user)
-        ctx['alerta_stock'] = Pesa.objects.filter(is_active=True, stock__lte=F('stock_min')).count()
+        from inventory.models import Part
+        ctx['role'] = get_role(user)
+        ctx['role_label'] = user.get_role_display()
+        ctx['alert_stock'] = Part.objects.filter(stock__lte=F('minimum_stock')).count()
     return ctx

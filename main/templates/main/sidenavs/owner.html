@@ -1,0 +1,13 @@
+<h5 class="sidenav-heading">Menu Prinsipál</h5>
+<ul class="side-menu list-unstyled">
+  <li><a href="{% url 'dashboard' %}" class="{% if request.path == '/Reports/dashboard/' %}active{% endif %}"><i class="fa fa-tachometer-alt"></i><span class="menu-text"> Dashboard</span></a></li>
+  <li><a href="{% url 'part-list' %}" class="{% if request.path == '/Inventory/' or '/Inventory/detail' in request.path %}active{% endif %}"><i class="fa fa-cogs"></i><span class="menu-text"> Spare Parts Data</span>{% if alert_stock %}<span class="badge badge-warning menu-badge">{{ alert_stock }}</span>{% endif %}</a></li>
+  <li><a href="{% url 'movement-list' %}" class="{% if '/Inventory/movement' in request.path %}active{% endif %}"><i class="fa fa-exchange-alt"></i><span class="menu-text"> Stock In / Out</span></a></li>
+  <li><a href="{% url 'repair-list' %}" class="{% if '/Repairs/' in request.path %}active{% endif %}"><i class="fa fa-wrench"></i><span class="menu-text"> Repairs</span></a></li>
+  <li><a href="{% url 'customer-list' %}" class="{% if '/Customers/' in request.path and 'equipment' not in request.path %}active{% endif %}"><i class="fa fa-users"></i><span class="menu-text"> Customer Data</span></a></li>
+  <li><a href="{% url 'equipment-list' %}" class="{% if '/Customers/equipment' in request.path %}active{% endif %}"><i class="fa fa-motorcycle"></i><span class="menu-text"> Equipment Data</span></a></li>
+</ul>
+<h5 class="sidenav-heading">Reports</h5>
+<ul class="side-menu list-unstyled">
+  <li><a href="{% url 'reports' %}" class="{% if request.path == '/Reports/' %}active{% endif %}"><i class="fa fa-file-pdf"></i><span class="menu-text"> Reports (PDF)</span></a></li>
+</ul>

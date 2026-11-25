@@ -1,0 +1,96 @@
+{% extends "main/layout.html" %}
+{% load sinerafil_tags %}
+{% block content %}
+<div class="container-fluid mt-3">
+
+  <!-- ───────── Flowchart: etapa reparasaun ───────── -->
+  <div class="card mb-3">
+    <div class="card-body py-3">
+      <div class="stepper">
+        {% for s in steps %}
+        <div class="step step-{{ s.state }}" title="{{ s.en }}">
+          <div class="step-icon"><i class="fa {% if s.state == 'done' %}fa-check{% else %}{{ s.icon }}{% endif %}"></i></div>
+          <div class="step-label"><strong>{{ forloop.counter }}. {{ s.en }}</strong><br><small>{{ s.tet }}</small></div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-5 mb-3">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between"><span><i class="fa fa-wrench"></i> {{ obj.repair_number }}</span>{{ obj.status|status_badge }}</div>
+        <div class="card-body">
+          <table class="table table-sm table-borderless">
+            <tr><td>Data</td><td>{{ obj.created_at|date:'d/m/Y' }}</td></tr>
+            <tr><td>Kliente</td><td>{{ obj.customer.name }} <small class="text-muted">{{ obj.customer.phone }}</small></td></tr>
+            <tr><td>Ekipamentu</td><td>{{ obj.equipment.name }}{% if obj.equipment.plate %} — {{ obj.equipment.plate }}{% endif %}</td></tr>
+            <tr><td>Nu. Rangka</td><td>{{ obj.equipment.serial_number|default:'—' }}</td></tr>
+            <tr><td>Mekániku</td><td>{{ obj.technician.display_name|default:'— seidauk hili —' }}</td></tr>
+            <tr><td>Diagnóstiku</td><td>{{ obj.diagnosis|default:'—'|linebreaksbr }}</td></tr>
+          </table>
+          <hr>
+          <table class="table table-sm table-borderless mb-2">
+            <tr><td>Total pesa</td><td class="text-right">{{ obj.parts_total|usd }}</td></tr>
+            <tr><td>Ongkos servisu</td><td class="text-right">{{ obj.service_cost|usd }}</td></tr>
+            <tr class="font-weight-bold"><td>TOTÁL</td><td class="text-right text-maroon h5 mb-0">{{ obj.total|usd }}</td></tr>
+            {% if role != "technician" %}<tr class="text-muted small"><td>Lukru estimadu</td><td class="text-right">{{ obj.profit|usd }}</td></tr>{% endif %}
+          </table>
+
+          <!-- aksaun tuir etapa -->
+          <div class="mb-2">
+            {% if can_operate and obj.status == 'registered' or can_operate and obj.status == 'diagnosed' %}
+              <a href="{% url 'repair-diagnose' obj.pk %}" class="btn btn-sm btn-blood"><i class="fa fa-search"></i> {% if obj.diagnosis %}Edita Diagnóstiku{% else %}2. Halo Diagnóstiku{% endif %}</a>
+            {% elif can_operate and obj.diagnosis %}
+              <a href="{% url 'repair-diagnose' obj.pk %}" class="btn btn-sm btn-outline-secondary"><i class="fa fa-search"></i> Edita Diagnóstiku</a>
+            {% endif %}
+            {% if is_admin and obj.status == 'diagnosed' or is_admin and obj.status == 'assigned' %}
+              <a href="{% url 'repair-assign' obj.pk %}" class="btn btn-sm {% if obj.status == 'diagnosed' %}btn-blood{% else %}btn-outline-secondary{% endif %}"><i class="fa fa-user-cog"></i> {% if obj.status == 'diagnosed' %}3. Hili Mekániku{% else %}Troka Mekániku{% endif %}</a>
+            {% endif %}
+            {% if can_operate and obj.status == 'assigned' %}
+              <form method="post" action="{% url 'repair-start' obj.pk %}" class="d-inline">{% csrf_token %}<button class="btn btn-sm btn-blood"><i class="fa fa-play"></i> 5. Hahú Prosesu</button></form>
+            {% endif %}
+            {% if can_operate and obj.status == 'in_progress' %}
+              <a href="{% url 'repair-complete' obj.pk %}" class="btn btn-sm btn-success"><i class="fa fa-check-circle"></i> 6. Konfirma Remata</a>
+            {% endif %}
+          </div>
+          <a href="{% url 'repair-invoice' obj.pk %}" target="_blank" class="btn btn-sm btn-primary"><i class="fa fa-print"></i> Invoice PDF</a>
+          {% if is_admin and obj.status != 'completed' %}<a href="{% url 'repair-edit' obj.pk %}" class="btn btn-sm btn-warning"><i class="fa fa-edit"></i> Edita</a>{% endif %}
+          <a href="{% url 'repair-list' %}" class="btn btn-sm btn-secondary">Fila</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-7 mb-3">
+      <div class="card">
+        <div class="card-header"><i class="fa fa-cogs"></i> 4. PESA NE'EBÉ UZA <small class="text-muted">(Spare Parts Usage · stock redús automátiku)</small></div>
+        <div class="table-responsive">
+          <table class="table table-sm mb-0">
+            <thead><tr><th>Pesa</th><th class="text-right text-nowrap">Kuant.</th><th class="text-right text-nowrap">Folin</th><th class="text-right text-nowrap">Subtotal</th>{% if can_use_parts %}<th></th>{% endif %}</tr></thead>
+            <tbody>
+            {% for it in obj.parts.all %}
+              <tr><td>{{ it.part.name }}<br><small class="text-muted">{{ it.part.sku }}</small></td><td class="text-right text-nowrap">{{ it.quantity }}</td><td class="text-right text-nowrap">{{ it.unit_price|usd }}</td><td class="text-right text-nowrap">{{ it.subtotal|usd }}</td>
+                {% if can_use_parts %}<td class="text-right"><form method="post" action="{% url 'repair-part-remove' obj.pk it.pk %}" onsubmit="return confirm('Hasai pesa ne\'e no fila stock?')">{% csrf_token %}<button class="btn btn-sm btn-outline-danger"><i class="fa fa-times"></i></button></form></td>{% endif %}</tr>
+            {% empty %}<tr><td colspan="5" class="text-center text-muted py-3">Seidauk uza pesa.</td></tr>{% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% if can_use_parts %}
+        <div class="card-footer bg-white">
+          <form method="post" action="{% url 'repair-part-add' obj.pk %}" class="form-row align-items-end">{% csrf_token %}
+            <div class="col-md-6 mb-2"><label class="small mb-0">{{ add_form.part.label }}</label>{{ add_form.part }}</div>
+            <div class="col-6 col-md-2 mb-2"><label class="small mb-0">{{ add_form.quantity.label }}</label>{{ add_form.quantity }}</div>
+            <div class="col-6 col-md-2 mb-2"><label class="small mb-0">Folin (USD)</label>{{ add_form.unit_price }}</div>
+            <div class="col-md-2 mb-2"><button class="btn btn-blood btn-block"><i class="fa fa-plus"></i></button></div>
+          </form>
+          <small class="text-muted">Folin mamuk = uza folin faan pesa nian. Stock sei redús bainhira aumenta pesa.</small>
+        </div>
+        {% elif obj.status != 'completed' %}
+        <div class="card-footer bg-white small text-muted">Pesa bele uza depois mekániku hili (etapa 3) no molok reparasaun remata.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

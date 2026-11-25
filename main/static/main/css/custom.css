@@ -114,3 +114,23 @@ body.auth { min-height: 100vh; background: radial-gradient(circle at 20% 20%, #b
   .qty-group { width: 100px; }
   .qty-group .btn { padding: .15rem .4rem; }
 }
+
+/* ---- stepper (etapa reparasaun, tuir flowchart) */
+.stepper { display: flex; gap: .25rem; overflow-x: auto; }
+.step { flex: 1 1 0; min-width: 120px; text-align: center; position: relative; padding: 0 .25rem; }
+.step::before { content: ""; position: absolute; top: 18px; left: -50%; width: 100%; height: 3px; background: #e0cfcf; z-index: 0; }
+.step:first-child::before { display: none; }
+.step-icon { position: relative; z-index: 1; width: 38px; height: 38px; line-height: 38px; margin: 0 auto .35rem; border-radius: 50%; background: #e9dede; color: #8a7375; font-size: .95rem; }
+.step-label { font-size: .72rem; line-height: 1.2; color: #8a7375; }
+.step-done .step-icon { background: #28a745; color: #fff; }
+.step-done::before { background: #28a745; }
+.step-done .step-label { color: #1e7e34; }
+.step-current .step-icon { background: var(--blood-bright); color: #fff; box-shadow: 0 0 0 4px rgba(179, 0, 27, .2); }
+.step-current::before { background: var(--blood-bright); }
+.step-current .step-label { color: var(--blood); }
+@media (max-width: 575.98px) {
+  .stepper { flex-wrap: wrap; overflow: visible; }
+  .step { flex: 0 0 33.333%; min-width: 0; margin-bottom: .6rem; }
+  .step::before { display: none; }
+  .step-label small { display: none; }
+}

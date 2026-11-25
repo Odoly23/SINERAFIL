@@ -23,3 +23,11 @@ def month_start(day, back=0):
 
 def to_decimal(value):
 	return Decimal(str(value or 0))
+
+
+def next_number(model, field, prefix):
+	"""Nú. otomátiku 'PREFIX-AAAAMM-0001' tuir fulan ne'e."""
+	last = (model.objects.filter(**{field + '__startswith': prefix})
+			.order_by('-' + field).values_list(field, flat=True).first())
+	n = int(last.split('-')[-1]) + 1 if last else 1
+	return '%s%04d' % (prefix, n)

@@ -1,0 +1,40 @@
+{% extends "main/layout.html" %}
+{% load sinerafil_tags %}
+{% block content %}
+<div class="container-fluid mt-3">
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="card">
+        <div class="card-header">
+          <i class="fa fa-list"> {{legend|upper}}</i>
+        </div>
+        <div class="card-body">
+          <div class="mb-2">{% if role == "admin" %}<a class="btn btn-primary btn-sm" href="{% url 'category-add' %}"><i class="fa fa-plus"></i> Aumenta</a>{% endif %}</div>
+          <div class="table-responsive">
+            <table id="example1" class="table table-sm table-hover" style="width:100%">
+              <thead>
+                <tr>
+                <th data-priority="10000">#</th>
+                <th data-priority="1">Naran Kategoria</th>
+                <th data-priority="2">Total Pesa</th>
+                <th data-priority="1">Aksaun</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for obj in objects %}
+                <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ obj.name }}</td>
+                <td>{{ obj.parts.count }}</td>
+                <td><span class="text-nowrap"><a class="btn btn-sm btn-warning" href="{% url 'category-edit' obj.pk %}" title="Edita"><i class="fa fa-edit"></i></a> <a class="btn btn-sm btn-danger" href="{% url 'category-delete' obj.pk %}" title="Hamoos"><i class="fa fa-trash"></i></a></span></td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

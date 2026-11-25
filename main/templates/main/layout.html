@@ -45,7 +45,7 @@
       <div class="breadcrumb-holder mb-2">
         <div class="container-fluid">
           <ul class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
             {% for i in link_antes %}
               <li class="breadcrumb-item"><a href="{% if i.link_param %}{% url i.link_name i.link_param %}{% else %}{% url i.link_name %}{% endif %}">{{ i.link_text }}</a></li>
             {% endfor %}

@@ -9,37 +9,30 @@
           <i class="fa fa-list"> {{legend|upper}}</i>
         </div>
         <div class="card-body">
-          
+          <div class="mb-2"><a class="btn btn-primary btn-sm" href="{% url 'user-add' %}"><i class="fa fa-plus"></i> Aumenta</a></div>
           <div class="table-responsive">
-            <a class="btn btn-primary btn-sm mb-2" href="{% url 'user-add' %}"><i class="fa fa-plus"></i> Aumenta</a>
             <table id="example1" class="table table-sm table-hover" style="width:100%">
               <thead>
                 <tr>
                 <th data-priority="10000">#</th>
-                <th data-priority="1">Naran</th>
-                <th data-priority="2">Username</th>
-                <th data-priority="3">Papél</th>
-                <th data-priority="5">Persen Ongkos</th>
+                <th data-priority="1">Username</th>
+                <th data-priority="2">Naran</th>
+                <th data-priority="3">Papél (role)</th>
                 <th data-priority="4">Ativu</th>
                 <th data-priority="6">Reset</th>
-                <th data-priority="3">Aksaun</th>
+                <th data-priority="1">Aksaun</th>
                 </tr>
               </thead>
               <tbody>
                 {% for obj in objects %}
                 <tr>
                 <td>{{ forloop.counter }}</td>
-                <td><a href="{% url 'emp-detail' obj.emp.pk %}">{{ obj.emp.name }}</a></td>
-                <td>{{ obj.user.username }}</td>
-                <td>{{ obj.user.groups.first.name|upper }}</td>
-                <td>{{ obj.emp.persen_ongkos }}%</td>
-                <td>{% if obj.user.is_active %}<i class='fa fa-check-circle text-success'></i>{% else %}<i class='fa fa-times-circle text-muted'></i>{% endif %}</td>
+                <td>{{ obj.username }}</td>
+                <td>{{ obj.full_name|default:'—' }}</td>
+                <td>{{ obj.get_role_display }}</td>
+                <td>{% if obj.is_active %}<i class='fa fa-check-circle text-success'></i>{% else %}<i class='fa fa-times-circle text-muted'></i>{% endif %}</td>
                 <td><a href="{% url 'reset-password' obj.pk %}" class="btn btn-warning btn-sm" onclick="return confirm('Reset password utilizadór ida ne?')">Reset Password</a></td>
-                <td class="text-nowrap">
-                  <a class="btn btn-sm btn-info" href="{% url 'emp-detail' obj.emp.pk %}" title="Haree"><i class="fa fa-eye"></i></a>
-                  {% if group == "admin" %}<a class="btn btn-sm btn-warning" href="{% url 'emp-update' obj.emp.pk %}" title="Edita"><i class="fa fa-edit"></i></a>{% endif %}
-                  {% if group == "admin" %}<a class="btn btn-sm btn-danger" href="{% url 'emp-delete' obj.emp.pk %}" title="Hamoos"><i class="fa fa-trash"></i></a>{% endif %}
-                </td>
+                <td><span class="text-nowrap"><a class="btn btn-sm btn-warning" href="{% url 'user-edit' obj.pk %}" title="Edita"><i class="fa fa-edit"></i></a></span></td>
                 </tr>
                 {% endfor %}
               </tbody>

@@ -1,0 +1,49 @@
+{% extends "main/layout.html" %}
+{% load sinerafil_tags %}
+{% block content %}
+<div class="container-fluid mt-3">
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="card">
+        <div class="card-header">
+          <i class="fa fa-list"> {{legend|upper}}</i>
+        </div>
+        <div class="card-body">
+          <div class="mb-2">
+            {% if role == "admin" %}<a class="btn btn-primary btn-sm" href="{% url 'movement-add' %}"><i class="fa fa-plus"></i> Aumenta</a>{% endif %}
+            <a class="btn btn-sm {% if not kind %}btn-secondary{% else %}btn-outline-secondary{% endif %}" href="{% url 'movement-list' %}">Hotu</a>
+            <a class="btn btn-sm {% if kind == 'in' %}btn-success{% else %}btn-outline-success{% endif %}" href="?type=in">Tama</a>
+            <a class="btn btn-sm {% if kind == 'out' %}btn-danger{% else %}btn-outline-danger{% endif %}" href="?type=out">Sai</a>
+          </div>
+          <div class="table-responsive">
+            <table id="example1" class="table table-sm table-hover" style="width:100%">
+              <thead>
+                <tr>
+                <th data-priority="10000">#</th>
+                <th data-priority="3">Data/Oras</th>
+                <th data-priority="1">Pesa</th>
+                <th data-priority="2">Tipu</th>
+                <th data-priority="2">Kuantidade</th>
+                <th data-priority="4">Nota</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for obj in objects %}
+                <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ obj.created_at|date:'d/m/Y H:i' }}</td>
+                <td><a href="{% url 'part-detail' obj.part.pk %}">{{ obj.part.name }}</a></td>
+                <td>{{ obj.movement_type|status_badge }}</td>
+                <td>{{ obj.quantity }}</td>
+                <td>{{ obj.note|default:'—' }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

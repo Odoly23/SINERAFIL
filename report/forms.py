@@ -2,21 +2,28 @@ from django import forms
 from django.utils import timezone
 
 from config.forms import bootstrap_widgets
-from pesa.forms import DateInput
+
+
+class DateInput(forms.DateInput):
+    input_type = 'date'
+
+    def __init__(self, **kwargs):
+        kwargs.setdefault('format', '%Y-%m-%d')
+        super().__init__(**kwargs)
 
 
 class ReportForm(forms.Form):
     TIPU = [
         ('stock', 'Stock pesa-rezerva (atuál)'),
-        ('movimentu', 'Sasán tama no sai'),
-        ('finanseiru', 'Finanseiru servisu'),
+        ('movement', 'Stock tama no sai (movimentu)'),
+        ('repair', 'Reparasaun / finanseiru'),
     ]
-    tipu = forms.ChoiceField(label='Tipu relatóriu', choices=TIPU)
+    type = forms.ChoiceField(label='Tipu relatóriu', choices=TIPU)
     date_from = forms.DateField(label='Husi data', widget=DateInput(), required=False)
     date_to = forms.DateField(label="To'o data", widget=DateInput(), required=False)
-    movimentu = forms.ChoiceField(
+    movement = forms.ChoiceField(
         label='Tipu movimentu', required=False,
-        choices=[('', 'Tama no Sai'), ('tama', "Tama de'it"), ('sai', "Sai de'it")])
+        choices=[('', 'Tama no Sai'), ('in', "Tama de'it"), ('out', "Sai de'it")])
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

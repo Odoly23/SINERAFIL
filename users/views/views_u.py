@@ -1,19 +1,17 @@
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 
+from config.activity import log_activity
 from users.forms import ChangePasswordForm
-from users.models import AuditLogin, EmpUser
+from users.models import ActivityLog
 
 
 @login_required
 def UserProfile(request):
-    emp_user = EmpUser.objects.filter(user=request.user).select_related('emp').first()
-    last_login = AuditLogin.objects.filter(user=request.user).order_by('-login_time')[:5]
     context = {
-        'profile': emp_user.emp if emp_user else None,
-        'last_login': last_login,
+        'last_login': ActivityLog.objects.filter(user=request.user, action='Login')[:5],
         'title': 'Profile Utilizador',
         'legend': 'Profile Utilizador',
     }
@@ -26,6 +24,7 @@ def change_password(request):
     if form.is_valid():
         user = form.save()
         update_session_auth_hash(request, user)
+        log_activity(user, 'Troka password')
         messages.success(request, 'Password troka ona ho susesu!')
         return redirect('UserProfile')
     context = {

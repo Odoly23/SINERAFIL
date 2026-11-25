@@ -14,7 +14,7 @@
   <div class="container">
     <a class="navbar-brand" href="/"><img src="{% static 'Image/logo.png' %}" height="40" class="mr-2" alt="">{{ SHOP_NAME }}</a>
     {% if user.is_authenticated %}
-      <a href="{% url 'home' %}" class="btn btn-light btn-sm"><i class="fa fa-tachometer-alt"></i> Home</a>
+      <a href="{% url 'dashboard' %}" class="btn btn-light btn-sm"><i class="fa fa-tachometer-alt"></i> Home</a>
     {% else %}
       <a href="{% url 'login' %}" class="btn btn-light btn-sm"><i class="fa fa-sign-in-alt"></i> Login</a>
     {% endif %}
@@ -26,8 +26,8 @@
       <div class="col-md-7">
         <h1 class="display-4">{{ SHOP_NAME }}</h1>
         <p class="lead">{{ SHOP_TAGLINE }}. Sistema informasaun jestaun inventáriu pesa-rezerva no servisu reparasaun — lalais, loos no iha tempu reál.</p>
-        <a href="{% if user.is_authenticated %}{% url 'home' %}{% else %}{% url 'login' %}{% endif %}" class="btn btn-light btn-lg text-maroon font-weight-bold">
-          <i class="fa fa-sign-in-alt"></i> {% if user.is_authenticated %}Tama ba Sistema{% else %}Login ba Sistema{% endif %}</a>
+        <a href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'login' %}{% endif %}" class="btn btn-light btn-lg text-maroon font-weight-bold">
+          <i class="fa fa-sign-in-alt"></i> {% if user.is_authenticated %}Tama ba Dashboard{% else %}Login ba Sistema{% endif %}</a>
       </div>
       <div class="col-md-5 text-center mt-4 mt-md-0"><img src="{% static 'Image/logo.png' %}" alt="{{ SHOP_NAME }}" class="img-fluid"></div>
     </div>
@@ -38,8 +38,8 @@
     <h2 class="text-center text-maroon mb-4">Funsaun Prinsipál</h2>
     <div class="row">
       <div class="col-md-4 mb-3"><div class="feature"><i class="fa fa-boxes"></i><h5 class="mt-2">Inventáriu Pesa-Rezerva</h5><p class="mb-0 text-muted">Jestaun dadus pesa, stock tama no sai, no alerta automátiku bainhira stock to'o mínimu.</p></div></div>
-      <div class="col-md-4 mb-3"><div class="feature"><i class="fa fa-wrench"></i><h5 class="mt-2">Servisu no Reparasaun</h5><p class="mb-0 text-muted">Rejistu servisu kliente, uza pesa ho redusaun stock automátiku no kálkulu kustu loloos.</p></div></div>
-      <div class="col-md-4 mb-3"><div class="feature"><i class="fa fa-file-pdf"></i><h5 class="mt-2">Relatóriu PDF</h5><p class="mb-0 text-muted">Relatóriu stock, movimentu no finanseiru, no nota servisu ba kliente ho formatu PDF.</p></div></div>
+      <div class="col-md-4 mb-3"><div class="feature"><i class="fa fa-wrench"></i><h5 class="mt-2">Jestaun Reparasaun</h5><p class="mb-0 text-muted">Rejistu reparasaun: diagnóstiku, hili mekániku, uza pesa ho redusaun stock automátiku no kálkulu kustu loloos.</p></div></div>
+      <div class="col-md-4 mb-3"><div class="feature"><i class="fa fa-file-pdf"></i><h5 class="mt-2">Relatóriu PDF</h5><p class="mb-0 text-muted">Relatóriu stock, movimentu no reparasaun, no invoice ba kliente ho formatu PDF.</p></div></div>
     </div>
   </div>
 </section>

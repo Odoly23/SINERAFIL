@@ -5,6 +5,13 @@ from django.utils.html import format_html
 
 register = template.Library()
 
+BADGES = {
+    'registered': ('secondary', 'Rejistu'), 'diagnosed': ('info', 'Diagnóstiku'),
+    'assigned': ('primary', 'Mekániku Hili'), 'in_progress': ('warning', 'Prosesu'),
+    'completed': ('success', 'Remata'),
+    'in': ('success', 'Tama'), 'out': ('danger', 'Sai'),
+}
+
 
 @register.filter
 def usd(value):
@@ -16,7 +23,6 @@ def usd(value):
 
 @register.filter
 def status_badge(value):
-    """Badge Bootstrap ba status servisu / tipu movimentu."""
-    css = {'pendente': 'secondary', 'prosesu': 'warning', 'remata': 'success',
-           'tama': 'success', 'sai': 'danger'}.get(str(value), 'secondary')
-    return format_html('<span class="badge badge-{}">{}</span>', css, str(value).capitalize())
+    """Badge Bootstrap ba status reparasaun / tipu movimentu stock."""
+    css, label = BADGES.get(str(value), ('secondary', str(value)))
+    return format_html('<span class="badge badge-{}">{}</span>', css, label)

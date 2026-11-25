@@ -1,60 +1,70 @@
-import uuid
-from decimal import Decimal
-
+from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.db import models
-from django.contrib.auth.models import User
-from django.core.validators import RegexValidator
-
-from custom.models import BaseModel
 
 
-class Emp(BaseModel):
-    name = models.CharField(max_length=100, verbose_name='Naran', null=True)
-    sexo = models.CharField(max_length=4, null=True, choices=[('Mane','Mane'),('Feto','Feto')])
-    phone = models.CharField(max_length=15, verbose_name="Nu. Telf.", validators=[RegexValidator(r'^\+?670\d{7,8}$', 'Format: +6707xxxxxxx')], null=True, blank=True)
-    email = models.EmailField(unique=True, null=True, blank=True)
-    persen_ongkos = models.DecimalField(
-        max_digits=5, decimal_places=2, default=Decimal('10.00'),
-        verbose_name='Persentajen ongkos mekániku (%)',
-        help_text="Parte husi ongkos servisu ne'ebé mekániku simu.")
+class UserManager(BaseUserManager):
+    use_in_migrations = True
 
-    class Meta:
-        ordering = ['name']
+    def create_user(self, username, password=None, role='technician', **extra):
+        if not username:
+            raise ValueError('Username tenke iha.')
+        user = self.model(username=username, role=role, **extra)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
 
-    def __str__(self):
-        return self.name
-
-
-class EmpUser(BaseModel):
-    emp = models.OneToOneField(Emp, on_delete=models.CASCADE, related_name="account", null=True)
-    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
-
-    def __str__(self):
-        return f'{self.emp.name} - {self.user.username}'
+    def create_superuser(self, username, password=None, **extra):
+        extra['role'] = 'admin'
+        return self.create_user(username, password, **extra)
 
 
-class AuditLogin(models.Model):
-    USER_TYPE_CHOICES = [
-        ('admin', 'Admin'),
-        ('mekaniku', 'Mekaniku'),
-        ('nain', "Na'in Ofisina"),
+class User(AbstractBaseUser):
+    """Tabel USER (ERD): id, username, password, role.
+    Kolun tambahan: full_name (naran hatudu), is_active (desativa konta)."""
+    ADMIN = 'admin'
+    TECHNICIAN = 'technician'
+    OWNER = 'owner'
+    ROLE_CHOICES = [
+        (ADMIN, 'Admin'),
+        (TECHNICIAN, 'Mekániku (Technician)'),
+        (OWNER, "Na'in Ofisina (Owner)"),
     ]
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="audit_logins")
-    user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES, null=True, blank=True)
-    login_time = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-    logout_time = models.DateTimeField(null=True, blank=True)
-    duration = models.DurationField(null=True, blank=True)
-    ip_address = models.GenericIPAddressField(null=True, blank=True)
-    user_agent = models.TextField(null=True, blank=True)
-    is_active = models.BooleanField(default=True)
+    username = models.CharField(max_length=150, unique=True, verbose_name='Naran utilizadór')
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default=TECHNICIAN, verbose_name='Papél')
+    full_name = models.CharField(max_length=150, blank=True, verbose_name='Naran kompletu')   # tambahan
+    is_active = models.BooleanField(default=True, verbose_name='Konta ativu')                  # tambahan
+    last_login = None      # ERD la iha last_login
 
-    def save(self, *args, **kwargs):
-        if self.logout_time and self.login_time:
-            self.duration = self.logout_time - self.login_time
-            self.is_active = False
-        super().save(*args, **kwargs)
+    objects = UserManager()
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = []
+
+    class Meta:
+        db_table = 'user'
+        ordering = ['username']
 
     def __str__(self):
-        return f'{self.user.username} - {self.login_time.strftime("%d/%m/%Y %H:%M")}'
+        return self.display_name
+
+    @property
+    def display_name(self):
+        return self.full_name or self.username
+
+    # kompatibilidade ho template/auth Django
+    def get_full_name(self):
+        return self.display_name
+
+
+class ActivityLog(models.Model):
+    """Tabel ACTIVITY_LOG (ERD): id, user_id, action, created_at."""
+    user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='activity_logs', verbose_name='Utilizadór')
+    action = models.CharField(max_length=255, verbose_name='Atividade')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Data/Oras')
+
+    class Meta:
+        db_table = 'activity_log'
+        ordering = ['-created_at', '-id']
+
+    def __str__(self):
+        return '%s: %s' % (self.user, self.action)

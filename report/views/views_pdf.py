@@ -1,15 +1,14 @@
 from django.contrib.auth.decorators import login_required
-from django.db.models import F
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 
+from config.activity import log_activity
 from config.decorators import allowed_users
-from kios.models import Faan
-from pesa.models import MovimentuStock, Pesa
+from inventory.models import Part, StockMovement
+from repairs.models import Repair
+from repairs.utils import can_view
 from report import pdf
 from report.forms import ReportForm
-from servisu.models import Despeza, Servisu
-from servisu.utils import can_view_servisu
 
 
 def pdf_response(content, filename, download=False):
@@ -19,14 +18,15 @@ def pdf_response(content, filename, download=False):
 
 
 @login_required
-@allowed_users(allowed_roles=['admin', 'nain'])
-def relatoriu(request):
+@allowed_users(allowed_roles=['admin', 'owner'])
+def reports(request):
+    """Reports: stock, movimentu stock no reparasaun (PDF)."""
     context = {
         'title': 'Relatóriu PDF',
-        'legend': 'Relatóriu PDF',
-        'link_antes': [{'link_name': "relatoriu", 'link_text': "Relatóriu PDF"}],
+        'legend': 'Relatóriu PDF (Reports)',
+        'link_antes': [{'link_name': "reports", 'link_text': "Reports"}],
     }
-    if not request.GET.get('tipu'):
+    if not request.GET.get('type'):
         context['form'] = ReportForm()
         return render(request, 'report/index.html', context)
     form = ReportForm(request.GET)
@@ -36,45 +36,28 @@ def relatoriu(request):
     d = form.cleaned_data
     d1, d2 = d['date_from'], d['date_to']
     download = bool(request.GET.get('download'))
-    if d['tipu'] == 'stock':
-        qs = Pesa.objects.filter(is_active=True).select_related('kategoria').order_by('name')
+    log_activity(request.user, 'Relatóriu %s' % d['type'])
+    if d['type'] == 'stock':
+        qs = Part.objects.select_related('category', 'supplier').order_by('name')
         return pdf_response(pdf.stock_report(qs), 'relatoriu-stock.pdf', download)
-    if d['tipu'] == 'movimentu':
-        qs = MovimentuStock.objects.filter(date__range=(d1, d2)).select_related('pesa').order_by('date', 'id')
+    if d['type'] == 'movement':
+        qs = (StockMovement.objects.filter(created_at__date__range=(d1, d2))
+              .select_related('part').order_by('created_at', 'id'))
         label = 'Tama no Sai'
-        if d['movimentu']:
-            qs = qs.filter(tipu=d['movimentu'])
-            label = dict(MovimentuStock.TIPU_CHOICES)[d['movimentu']]
-        return pdf_response(pdf.movimentu_report(qs, d1, d2, label), 'relatoriu-movimentu.pdf', download)
-    servisu = (Servisu.objects.filter(status=Servisu.REMATA, date__range=(d1, d2))
-               .select_related('kliente', 'motor', 'mekanik').prefetch_related('items').order_by('date', 'id'))
-    despeza = Despeza.objects.filter(date__range=(d1, d2)).order_by('date')
-    faan = (Faan.objects.filter(status=Faan.REMATA, date__date__range=(d1, d2))
-            .prefetch_related('items').order_by('date'))
-    return pdf_response(pdf.finance_report(servisu, despeza, d1, d2, faan), 'relatoriu-finanseiru.pdf', download)
+        if d['movement']:
+            qs = qs.filter(movement_type=d['movement'])
+            label = dict(StockMovement.TYPE_CHOICES)[d['movement']]
+        return pdf_response(pdf.movement_report(qs, d1, d2, label), 'relatoriu-movimentu.pdf', download)
+    repairs = (Repair.objects.filter(status=Repair.COMPLETED, created_at__date__range=(d1, d2))
+               .select_related('customer', 'equipment', 'technician').prefetch_related('parts__part')
+               .order_by('created_at', 'id'))
+    return pdf_response(pdf.repair_report(repairs, d1, d2), 'relatoriu-reparasaun.pdf', download)
 
 
 @login_required
-@allowed_users(allowed_roles=['admin', 'mekaniku', 'nain'])
-def nota_servisu(request, pk):
-    s = get_object_or_404(Servisu.objects.select_related('kliente', 'motor', 'mekanik'), pk=pk)
-    if not can_view_servisu(request.user, s):
+@allowed_users(allowed_roles=['admin', 'technician', 'owner'])
+def repair_invoice(request, pk):
+    r = get_object_or_404(Repair.objects.select_related('customer', 'equipment', 'technician'), pk=pk)
+    if not can_view(request.user, r):
         return render(request, 'auth/404.html', status=403)
-    return pdf_response(pdf.nota_servisu(s), 'nota-%s.pdf' % s.invoice_no, bool(request.GET.get('download')))
-
-
-@login_required
-@allowed_users(allowed_roles=['admin'])
-def pesa_label(request):
-    """PDF label barcode: hotu pesa ativu (default) ka pesa ida ho `?pk=<id>&n=<kópia>`."""
-    qs = Pesa.objects.filter(is_active=True).order_by('name')
-    copies = 1
-    if request.GET.get('pk'):
-        qs = qs.filter(pk=request.GET['pk'])
-        try:
-            copies = min(max(int(request.GET.get('n', 1)), 1), 90)
-        except ValueError:
-            copies = 1
-    elif request.GET.get('low'):
-        qs = qs.filter(stock__lte=F('stock_min'))
-    return pdf_response(pdf.barcode_labels(list(qs), copies), 'label-barcode.pdf', bool(request.GET.get('download')))
+    return pdf_response(pdf.repair_invoice(r), 'invoice-%s.pdf' % r.repair_number, bool(request.GET.get('download')))

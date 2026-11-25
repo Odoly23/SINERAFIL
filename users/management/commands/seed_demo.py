@@ -1,37 +1,33 @@
-"""Kria utilizadór demo (admin, mekániku, na'in) no dadus ezemplu kliente/servisu."""
+"""Kria utilizadór demo (admin, mekániku, na'in) no dadus ezemplu kliente/ekipamentu/reparasaun."""
 import random
 from datetime import timedelta
 
-from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils import timezone
 
-from cliente.models import Kliente, Motor
-from pesa.models import MovimentuStock, Pesa
-from pesa.utils import register_movement
-from kios.utils import create_sale
-from servisu.models import Despeza, Servisu, ServisuPesa
-from users.models import Emp
-from users.utils import save_emp_account
+from customers.models import Customer, Equipment
+from inventory.models import Part
+from repairs.models import Repair
+from repairs.utils import add_part
+from users.models import User
 
 PASSWORD = 'nerafil123'
-FUNCIONARIU = [
-    # naran, sexo, username, grupu, persen
-    ('Admin Nerafil', 'Mane', 'admin', 'admin', 0),
-    ('Zin', 'Mane', 'zin', 'mekaniku', 10),
-    ('Anata', 'Mane', 'anata', 'mekaniku', 10),
-    ('Abosa', 'Mane', 'abosa', 'mekaniku', 12),
-    ("Na'in Ofisina", 'Mane', 'nain', 'nain', 0),
+USERS = [
+    ('admin', 'Admin Nerafil', 'admin'),
+    ('zin', 'Zin', 'technician'),
+    ('anata', 'Anata', 'technician'),
+    ('abosa', 'Abosa', 'technician'),
+    ('nain', "Na'in Ofisina", 'owner'),
 ]
-KLIENTE = [
+CUSTOMERS = [
     ('João Soares', '77231001'), ('Maria da Costa', '77231002'), ('Abel Guterres', '77231003'),
     ('Domingas Amaral', '77231004'), ('Paulo Ximenes', '77231005'), ('Luís Belo', '77231006'),
 ]
-MOTOR = [('Honda', 'Beat'), ('Honda', 'Vario 125'), ('Yamaha', 'Vixion'), ('Honda', 'Supra X'),
-         ('Yamaha', 'Mio'), ('Honda', 'Revo')]
-KELUHAN = ['Troka oli no filtru', 'Troka kampas rem', 'Servisu CVT', 'Troka piston no ring',
-           'Servisu kompletu', 'Troka busi no filtru udara']
+EQUIPMENT = [('Honda Beat', 'MH1JF8113KK'), ('Honda Vario 125', 'MH1JFM116LK'), ('Yamaha Vixion', 'MH3RG4210JK'),
+             ('Honda Supra X', 'MH1KC4110HK'), ('Yamaha Mio', 'MH3SE8810GJ'), ('Honda Revo', 'MH1JB5110FK')]
+DIAGNOSIS = ['Oli mesin no filtru oli presiza troka', 'Kampas rem kotuk aat tebes', 'Roller CVT no belt hotu ona',
+             'Piston no ring aat, kompresaun fraku', 'Busi no filtru udara foer', 'Kabel rem sulin, presiza troka']
 
 
 class Command(BaseCommand):
@@ -39,63 +35,52 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def handle(self, *args, **opts):
-        for name, sexo, username, group, pct in FUNCIONARIU:
-            if User.objects.filter(username=username).exists():
-                continue
-            emp = Emp.objects.create(name=name, sexo=sexo, persen_ongkos=pct or 10)
-            user = save_emp_account(emp, username, group, PASSWORD)
-            if group == 'admin':
-                user.is_superuser = user.is_staff = True
-                user.save()
+        for username, name, role in USERS:
+            if not User.objects.filter(username=username).exists():
+                User.objects.create_user(username, PASSWORD, role=role, full_name=name)
 
-        # barcode demo (EAN-13 style) ba pesa 30 primeiru, atu bele teste scanner
-        for i, p in enumerate(Pesa.objects.filter(barcode__isnull=True).order_by('id')[:30], 1):
-            p.barcode = '899%010d' % i
-            p.save(update_fields=['barcode'])
-
-        if Servisu.objects.exists():
-            self.stdout.write('Dadus servisu iha ona — la kria fali.')
+        if Repair.objects.exists():
+            self.stdout.write('Dadus reparasaun iha ona — la kria fali.')
             return
 
         rnd = random.Random(7)
-        klientes = [Kliente.objects.create(name=n, phone=t, address='Dili') for n, t in KLIENTE]
-        motors = [Motor.objects.create(kliente=k, plate='DIL-%04d' % (1000 + i), brand=MOTOR[i][0],
-                                       model_name=MOTOR[i][1], year=2015 + i)
-                  for i, k in enumerate(klientes)]
-        pesa = list(Pesa.objects.filter(stock__gt=20, price_sell__lte=40))
-        mekaniks = list(Emp.objects.filter(account__user__groups__name='mekaniku'))
-        admin = User.objects.get(username='admin')
-        today = timezone.localdate()
-        for _ in range(24):
-            i = rnd.randrange(len(klientes))
-            m = rnd.choice(mekaniks)
-            s = Servisu.objects.create(
-                date=today - timedelta(days=rnd.randint(0, 150)), kliente=klientes[i], motor=motors[i],
-                mekanik=m, complaint=rnd.choice(KELUHAN), labor_cost=rnd.choice([2, 3, 4.5, 5, 8, 12]),
-                mech_percent=m.persen_ongkos,
-                status=rnd.choice(['remata', 'remata', 'remata', 'prosesu', 'pendente']), created_by=admin)
-            for p in (rnd.sample(pesa, k=min(len(pesa), rnd.randint(1, 3))) if pesa else []):
-                qty = rnd.randint(1, 2)
-                register_movement(p, MovimentuStock.SAI, qty, user=admin, servisu=s, reference=s.invoice_no,
-                                  note='Uza iha servisu %s' % s.invoice_no)
-                ServisuPesa.objects.create(servisu=s, pesa=p, quantity=qty,
-                                           price_buy=p.price_buy, price_sell=p.price_sell)
-        for d, v in [('Be, eletrisidade', 5), ('Ferramenta foun', 8), ('Hahan no be hemu', 4)]:
-            Despeza.objects.create(description=d, amount=v, date=today - timedelta(days=rnd.randint(0, 40)),
-                                   created_by=admin)
-        if pesa:   # hodi hatudu alerta stock mínimu
-            low = pesa[0]
-            low.refresh_from_db()
-            register_movement(low, MovimentuStock.SAI, low.stock - 1, user=admin, note='Demo alerta stock')
-        # faan kios demo
-        import json
-        stock_ok = list(Pesa.objects.filter(stock__gte=3, price_sell__lte=30)[:12])
-        for _ in range(6):
-            chosen = rnd.sample(stock_ok, k=2)
-            cart = json.dumps([{'pesa': p.pk, 'qty': rnd.randint(1, 2)} for p in chosen])
-            total = sum(p.price_sell * q['qty'] for p, q in zip(chosen, json.loads(cart)))
-            f = create_sale(admin, cart, '0', str(int(total) + 5), note='Demo')
-            f.date = timezone.now() - timedelta(days=rnd.randint(0, 40))
-            f.save()
+        customers = [Customer.objects.create(name=n, phone=t) for n, t in CUSTOMERS]
+        equipments = [Equipment.objects.create(customer=c, name=EQUIPMENT[i][0], serial_number=EQUIPMENT[i][1],
+                                               plate='DIL-%04d' % (1000 + i))
+                      for i, c in enumerate(customers)]
+        parts = list(Part.objects.filter(stock__gte=20, selling_price__lte=40))
+        technicians = list(User.objects.filter(role='technician'))
+        now = timezone.now()
+
+        flows = ['completed'] * 15 + ['in_progress'] * 3 + ['assigned'] * 2 + ['diagnosed'] * 2 + ['registered'] * 2
+        for status in flows:
+            i = rnd.randrange(len(customers))
+            r = Repair.objects.create(customer=customers[i], equipment=equipments[i],
+                                      created_at=now - timedelta(days=rnd.randint(0, 150)))
+            if status == 'registered':
+                continue
+            r.diagnosis = rnd.choice(DIAGNOSIS)
+            r.status = Repair.DIAGNOSED
+            r.save()
+            if status == 'diagnosed':
+                continue
+            r.technician = rnd.choice(technicians)
+            r.status = Repair.ASSIGNED
+            r.save()
+            if status == 'assigned':
+                continue
+            for p in (rnd.sample(parts, k=min(len(parts), rnd.randint(1, 3))) if parts else []):
+                add_part(r, p, rnd.randint(1, 2))
+            r.status = Repair.IN_PROGRESS
+            r.save()
+            if status == 'in_progress':
+                continue
+            r.service_cost = rnd.choice([2, 3, 4.5, 5, 8, 12])
+            r.status = Repair.COMPLETED
+            r.save()
+        if parts:   # hodi hatudu alerta stock mínimu
+            low = Part.objects.get(pk=parts[0].pk)
+            from inventory.utils import register_movement
+            register_movement(low, 'out', low.stock - 1, note='Demo alerta stock')
         self.stdout.write(self.style.SUCCESS(
             'Dadus demo kria ona. Login: admin / zin / anata / abosa / nain — password: %s' % PASSWORD))

@@ -1,0 +1,40 @@
+{% extends "main/layout.html" %}
+{% load sinerafil_tags %}
+{% block content %}
+<div class="container-fluid mt-3">
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="card">
+        <div class="card-header">
+          <i class="fa fa-list"> {{legend|upper}}</i>
+        </div>
+        <div class="card-body">
+          
+          <div class="table-responsive">
+            <table id="example1" class="table table-sm table-hover" style="width:100%">
+              <thead>
+                <tr>
+                <th data-priority="10000">#</th>
+                <th data-priority="1">Data/Oras</th>
+                <th data-priority="2">Utilizadór</th>
+                <th data-priority="1">Atividade</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for obj in objects %}
+                <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ obj.created_at|date:'d/m/Y H:i:s' }}</td>
+                <td>{{ obj.user.username }} <small class="text-muted">({{ obj.user.get_role_display }})</small></td>
+                <td>{{ obj.action }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
